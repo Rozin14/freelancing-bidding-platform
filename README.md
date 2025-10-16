@@ -1,6 +1,6 @@
 # FreelanceHub - Freelance Bidding Platform
 
-A comprehensive freelance bidding platform similar to Upwork, built with React frontend and Node.js/Express backend with MongoDB.
+A basic yet feature rich freelance bidding platform, built with React frontend and Node.js/Express backend with MongoDB.
 
 ## Features
 
