@@ -75,8 +75,14 @@ const ProjectDetail = () => {
     e.preventDefault();
 
     // Check if client is suspended
-    if (project?.clientId && typeof project.clientId === 'object' && project.clientId.isActive === false) {
-      alert('Cannot place bid: The client who posted this project has been suspended by administration.');
+    if (
+      project?.clientId &&
+      typeof project.clientId === 'object' &&
+      project.clientId.isActive === false
+    ) {
+      alert(
+        'Cannot place bid: The client who posted this project has been suspended by administration.'
+      );
       return;
     }
 
@@ -121,7 +127,7 @@ const ProjectDetail = () => {
       try {
         const response = await axios.put(`/api/bids/${bidId}/accept`);
         fetchProjectDetails(); // Refresh data
-        
+
         // Handle platform notification if present
         if (response.data.notification) {
           const notification = response.data.notification;
@@ -134,15 +140,23 @@ const ProjectDetail = () => {
             fromUsername: 'FreelanceHub Platform',
             toUsername: 'Freelancer',
             projectId: notification.projectId,
-            type: 'platform_notification'
+            type: 'platform_notification',
           };
 
           // Get existing notifications and add new one
-          const existingNotifications = JSON.parse(localStorage.getItem('platformNotifications') || '[]');
-          const updatedNotifications = [...existingNotifications, platformNotification];
-          localStorage.setItem('platformNotifications', JSON.stringify(updatedNotifications));
+          const existingNotifications = JSON.parse(
+            localStorage.getItem('platformNotifications') || '[]'
+          );
+          const updatedNotifications = [
+            ...existingNotifications,
+            platformNotification,
+          ];
+          localStorage.setItem(
+            'platformNotifications',
+            JSON.stringify(updatedNotifications)
+          );
         }
-        
+
         alert('Bid accepted and freelancer assigned successfully!');
       } catch (error) {
         console.error('Error accepting bid:', error);
@@ -161,20 +175,29 @@ const ProjectDetail = () => {
     setShowEditForm(true);
   };
 
-  const handleCancelBid = async (bidId) => {
-    if (window.confirm('Are you sure you want to cancel this bid? This action cannot be undone.')) {
+  const handleCancelBid = async bidId => {
+    if (
+      window.confirm(
+        'Are you sure you want to cancel this bid? This action cannot be undone.'
+      )
+    ) {
       try {
         const response = await axios.delete(`/api/bids/${bidId}`);
-        
+
         // Handle platform notification if present (for accepted bids)
         if (response.data.notification) {
           const notification = response.data.notification;
-          
+
           // Check if there's an active conversation between client and freelancer for this project
-          const existingMessages = JSON.parse(localStorage.getItem('messages') || '[]');
-          const hasActiveConversation = existingMessages.some(msg => 
-            (msg.from === notification.clientId && msg.to === notification.freelancerId) ||
-            (msg.from === notification.freelancerId && msg.to === notification.clientId)
+          const existingMessages = JSON.parse(
+            localStorage.getItem('messages') || '[]'
+          );
+          const hasActiveConversation = existingMessages.some(
+            msg =>
+              (msg.from === notification.clientId &&
+                msg.to === notification.freelancerId) ||
+              (msg.from === notification.freelancerId &&
+                msg.to === notification.clientId)
           );
 
           // Only create notification if there's an active conversation
@@ -189,13 +212,21 @@ const ProjectDetail = () => {
               toUsername: 'Client',
               projectId: notification.projectId,
               type: 'platform_notification',
-              isRead: false
+              isRead: false,
             };
 
             // Get existing notifications and add new one
-            const existingNotifications = JSON.parse(localStorage.getItem('platformNotifications') || '[]');
-            const updatedNotifications = [...existingNotifications, platformNotification];
-            localStorage.setItem('platformNotifications', JSON.stringify(updatedNotifications));
+            const existingNotifications = JSON.parse(
+              localStorage.getItem('platformNotifications') || '[]'
+            );
+            const updatedNotifications = [
+              ...existingNotifications,
+              platformNotification,
+            ];
+            localStorage.setItem(
+              'platformNotifications',
+              JSON.stringify(updatedNotifications)
+            );
           }
         }
 
@@ -203,7 +234,9 @@ const ProjectDetail = () => {
         fetchProjectDetails(); // Refresh to update bids list
       } catch (error) {
         console.error('Error canceling bid:', error);
-        const errorMessage = error.response?.data?.message || 'Error canceling bid. Please try again.';
+        const errorMessage =
+          error.response?.data?.message ||
+          'Error canceling bid. Please try again.';
         alert(errorMessage);
       }
     }
@@ -257,11 +290,13 @@ const ProjectDetail = () => {
   };
 
   const handleMarkCompleted = async () => {
-    if (window.confirm('Are you sure you want to mark this project as completed?')) {
+    if (
+      window.confirm('Are you sure you want to mark this project as completed?')
+    ) {
       try {
         const response = await axios.put(`/api/projects/${id}/complete`);
         fetchProjectDetails(); // Refresh data
-        
+
         // Handle platform notification if present
         if (response.data.notification) {
           const notification = response.data.notification;
@@ -275,30 +310,46 @@ const ProjectDetail = () => {
             toUsername: project.clientId?.username || 'Client',
             projectId: notification.projectId,
             type: 'platform_notification',
-            isRead: false
+            isRead: false,
           };
 
           // Get existing notifications and add new one
-          const existingNotifications = JSON.parse(localStorage.getItem('platformNotifications') || '[]');
-          const updatedNotifications = [...existingNotifications, platformNotification];
-          localStorage.setItem('platformNotifications', JSON.stringify(updatedNotifications));
+          const existingNotifications = JSON.parse(
+            localStorage.getItem('platformNotifications') || '[]'
+          );
+          const updatedNotifications = [
+            ...existingNotifications,
+            platformNotification,
+          ];
+          localStorage.setItem(
+            'platformNotifications',
+            JSON.stringify(updatedNotifications)
+          );
         }
-        
+
         alert('Project marked as completed successfully!');
       } catch (error) {
         console.error('Error marking project as completed:', error);
-        const errorMessage = error.response?.data?.message || 'Error marking project as completed. Please try again.';
+        const errorMessage =
+          error.response?.data?.message ||
+          'Error marking project as completed. Please try again.';
         alert(errorMessage);
       }
     }
   };
 
   const handleUnmarkCompleted = async () => {
-    if (window.confirm('Are you sure you want to unmark this project as completed? This will change the status back to in progress.')) {
+    if (
+      window.confirm(
+        'Are you sure you want to unmark this project as completed? This will change the status back to in progress.'
+      )
+    ) {
       try {
-        const response = await axios.put(`/api/projects/${id}/unmark-completed`);
+        const response = await axios.put(
+          `/api/projects/${id}/unmark-completed`
+        );
         fetchProjectDetails(); // Refresh data
-        
+
         // Handle platform notification if present
         if (response.data.notification) {
           const notification = response.data.notification;
@@ -312,33 +363,47 @@ const ProjectDetail = () => {
             toUsername: project.clientId?.username || 'Client',
             projectId: notification.projectId,
             type: 'platform_notification',
-            isRead: false
+            isRead: false,
           };
 
           // Get existing notifications and add new one
-          const existingNotifications = JSON.parse(localStorage.getItem('platformNotifications') || '[]');
-          const updatedNotifications = [...existingNotifications, platformNotification];
-          localStorage.setItem('platformNotifications', JSON.stringify(updatedNotifications));
+          const existingNotifications = JSON.parse(
+            localStorage.getItem('platformNotifications') || '[]'
+          );
+          const updatedNotifications = [
+            ...existingNotifications,
+            platformNotification,
+          ];
+          localStorage.setItem(
+            'platformNotifications',
+            JSON.stringify(updatedNotifications)
+          );
         }
-        
+
         alert('Project unmarked as completed successfully!');
       } catch (error) {
         console.error('Error unmarking project as completed:', error);
-        const errorMessage = error.response?.data?.message || 'Error unmarking project as completed. Please try again.';
+        const errorMessage =
+          error.response?.data?.message ||
+          'Error unmarking project as completed. Please try again.';
         alert(errorMessage);
       }
     }
   };
 
   const handleCancelProject = async () => {
-    if (!window.confirm('Are you sure you want to cancel this project? This action cannot be undone and the freelancer will be notified if they are working on it.')) {
+    if (
+      !window.confirm(
+        'Are you sure you want to cancel this project? This action cannot be undone and the freelancer will be notified if they are working on it.'
+      )
+    ) {
       return;
     }
 
     try {
       const response = await axios.put(`/api/projects/${id}/cancel`);
       fetchProjectDetails(); // Refresh data
-      
+
       // Handle platform notification if present
       if (response.data.notification) {
         const notification = response.data.notification;
@@ -352,25 +417,39 @@ const ProjectDetail = () => {
           toUsername: 'Freelancer',
           projectId: notification.projectId,
           type: 'platform_notification',
-          isRead: false
+          isRead: false,
         };
 
         // Get existing notifications and add new one
-        const existingNotifications = JSON.parse(localStorage.getItem('platformNotifications') || '[]');
-        const updatedNotifications = [...existingNotifications, platformNotification];
-        localStorage.setItem('platformNotifications', JSON.stringify(updatedNotifications));
+        const existingNotifications = JSON.parse(
+          localStorage.getItem('platformNotifications') || '[]'
+        );
+        const updatedNotifications = [
+          ...existingNotifications,
+          platformNotification,
+        ];
+        localStorage.setItem(
+          'platformNotifications',
+          JSON.stringify(updatedNotifications)
+        );
       }
 
       alert('Project cancelled successfully!');
     } catch (error) {
       console.error('Error cancelling project:', error);
-      const errorMessage = error.response?.data?.message || 'Error cancelling project. Please try again.';
+      const errorMessage =
+        error.response?.data?.message ||
+        'Error cancelling project. Please try again.';
       alert(errorMessage);
     }
   };
 
   const handleReopenProject = async () => {
-    if (!window.confirm('Are you sure you want to reopen this project? It will be available for freelancers to bid on again.')) {
+    if (
+      !window.confirm(
+        'Are you sure you want to reopen this project? It will be available for freelancers to bid on again.'
+      )
+    ) {
       return;
     }
 
@@ -380,7 +459,9 @@ const ProjectDetail = () => {
       alert('Project reopened successfully!');
     } catch (error) {
       console.error('Error reopening project:', error);
-      const errorMessage = error.response?.data?.message || 'Error reopening project. Please try again.';
+      const errorMessage =
+        error.response?.data?.message ||
+        'Error reopening project. Please try again.';
       alert(errorMessage);
     }
   };
@@ -411,11 +492,29 @@ const ProjectDetail = () => {
         <div className="card">
           <div className="flex-between mb-20">
             <h1>{project.title}</h1>
-            <span className={`status-badge status-${project.status}`}>
-              {project.status === 'closed' ? 'completed and closed' : 
-               project.status === 'cancelled' ? 'cancelled' : 
-               project.status.replace('_', ' ')}
-            </span>
+            <div className="flex gap-10 align-center">
+              <span className={`status-badge status-${project.status}`}>
+                {project.status === 'closed'
+                  ? 'completed and closed'
+                  : project.status === 'cancelled'
+                  ? 'cancelled'
+                  : project.status.replace('_', ' ')}
+              </span>
+              {/* Edit Project Button - Only for project owner (client) */}
+              {user &&
+                user.role === 'client' &&
+                project.clientId._id === user.id &&
+                project.status !== 'closed' &&
+                project.status !== 'cancelled' && (
+                  <button
+                    className="btn btn-outline-primary btn-sm"
+                    onClick={() => navigate(`/projects/${id}/edit`)}
+                    title="Edit Project"
+                  >
+                    ✏️ Edit
+                  </button>
+                )}
+            </div>
           </div>
 
           <div className="mb-20">
@@ -430,18 +529,30 @@ const ProjectDetail = () => {
                 <strong>Budget:</strong> ₹{project.budget}
               </div>
               <div>
-                <strong>Client:</strong> 
-                <Link 
+                <strong>Client:</strong>
+                <Link
                   to={`/profile/${project.clientId._id}`}
-                  style={{ marginLeft: '5px', color: '#007bff', textDecoration: 'none' }}
+                  style={{
+                    marginLeft: '5px',
+                    color: '#007bff',
+                    textDecoration: 'none',
+                  }}
                 >
                   {project.clientId.username}
                 </Link>
-                {user && user.role === 'client' && project.clientId._id === user.id && (
-                  <span style={{ marginLeft: '5px', color: '#28a745', fontWeight: 'bold' }}>
-                    (You)
-                  </span>
-                )}
+                {user &&
+                  user.role === 'client' &&
+                  project.clientId._id === user.id && (
+                    <span
+                      style={{
+                        marginLeft: '5px',
+                        color: '#28a745',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      (You)
+                    </span>
+                  )}
               </div>
               {project.deadline && (
                 <div>
@@ -476,75 +587,96 @@ const ProjectDetail = () => {
           )}
 
           {/* Warning if client is suspended */}
-          {project?.clientId && typeof project.clientId === 'object' && project.clientId.isActive === false && (
-            <div style={{
-              padding: '15px',
-              backgroundColor: '#fff3cd',
-              border: '1px solid #ffc107',
-              borderRadius: '8px',
-              marginBottom: '20px',
-              textAlign: 'center'
-            }}>
-              <p style={{ 
-                margin: 0, 
-                color: '#856404',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}>
-                ⚠️ The client who posted this project has been suspended by administration
-              </p>
-            </div>
-          )}
+          {project?.clientId &&
+            typeof project.clientId === 'object' &&
+            project.clientId.isActive === false && (
+              <div
+                style={{
+                  padding: '15px',
+                  backgroundColor: '#fff3cd',
+                  border: '1px solid #ffc107',
+                  borderRadius: '8px',
+                  marginBottom: '20px',
+                  textAlign: 'center',
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    color: '#856404',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                  }}
+                >
+                  ⚠️ The client who posted this project has been suspended by
+                  administration
+                </p>
+              </div>
+            )}
 
           {project.freelancerId && (
             <div className="mb-20">
               <h3>Assigned Freelancer</h3>
               <p>
-                <Link 
+                <Link
                   to={`/profile/${project.freelancerId._id}`}
-                  style={{ color: '#007bff', textDecoration: 'none', fontWeight: 'bold' }}
+                  style={{
+                    color: '#007bff',
+                    textDecoration: 'none',
+                    fontWeight: 'bold',
+                  }}
                 >
                   {project.freelancerId.username}
                 </Link>
-                {user && user.role === 'freelancer' && project.freelancerId._id === user.id && (
-                  <span style={{ color: '#6c757d', fontWeight: 'normal', marginLeft: '8px' }}>
-                    (You)
-                  </span>
-                )}
+                {user &&
+                  user.role === 'freelancer' &&
+                  project.freelancerId._id === user.id && (
+                    <span
+                      style={{
+                        color: '#6c757d',
+                        fontWeight: 'normal',
+                        marginLeft: '8px',
+                      }}
+                    >
+                      (You)
+                    </span>
+                  )}
               </p>
-              
+
               {/* Show "Mark as Completed" button for the assigned freelancer */}
-              {user && user.role === 'freelancer' && 
-               project.freelancerId._id === user.id && 
-               project.status === 'in_progress' && (
-                <div className="mt-20">
-                  <button
-                    className="btn btn-success"
-                    onClick={handleMarkCompleted}
-                  >
-                    Mark Project as Completed
-                  </button>
-                </div>
-              )}
+              {user &&
+                user.role === 'freelancer' &&
+                project.freelancerId._id === user.id &&
+                project.status === 'in_progress' && (
+                  <div className="mt-20">
+                    <button
+                      className="btn btn-success"
+                      onClick={handleMarkCompleted}
+                    >
+                      Mark Project as Completed
+                    </button>
+                  </div>
+                )}
 
               {/* Show "Unmark as Completed" button for the assigned freelancer */}
-              {user && user.role === 'freelancer' && 
-               project.freelancerId._id === user.id && 
-               project.status === 'completed' && (
-                <div className="mt-20">
-                  <button
-                    className="btn btn-warning"
-                    onClick={handleUnmarkCompleted}
-                    style={{
-                      backgroundColor: '#ffc107',
-                      borderColor: '#ffc107',
-                      color: '#212529'
-                    }}
-                  >
-                    Unmark as Completed
-                  </button>
-                </div>
-              )}
+              {user &&
+                user.role === 'freelancer' &&
+                project.freelancerId._id === user.id &&
+                project.status === 'completed' && (
+                  <div className="mt-20">
+                    <button
+                      className="btn btn-warning"
+                      onClick={handleUnmarkCompleted}
+                      style={{
+                        backgroundColor: '#ffc107',
+                        borderColor: '#ffc107',
+                        color: '#212529',
+                      }}
+                    >
+                      Unmark as Completed
+                    </button>
+                  </div>
+                )}
             </div>
           )}
 
@@ -709,90 +841,122 @@ const ProjectDetail = () => {
           )}
 
           {/* Re-open Project Button - Only for cancelled projects */}
-          {user && user.role === 'client' && project.clientId._id === user.id && 
-           project.status === 'cancelled' && (
-            <div style={{ 
-              marginTop: '20px', 
-              padding: '15px', 
-              border: '1px solid #28a745', 
-              borderRadius: '8px',
-              backgroundColor: '#f8fff8',
-              textAlign: 'center'
-            }}>
-              <h4 style={{ color: '#28a745', marginBottom: '10px', fontSize: '16px' }}>🔄 Re-open Project</h4>
-              <p style={{ color: '#666', marginBottom: '15px', fontSize: '14px' }}>
-                This project is currently cancelled. You can reopen it to make it available for freelancers to bid on again.
-              </p>
-              <button
-                onClick={handleReopenProject}
+          {user &&
+            user.role === 'client' &&
+            project.clientId._id === user.id &&
+            project.status === 'cancelled' && (
+              <div
                 style={{
-                  backgroundColor: '#28a745',
-                  color: 'white',
-                  border: 'none',
-                  padding: '10px 20px',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.3s'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = '#218838';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = '#28a745';
+                  marginTop: '20px',
+                  padding: '15px',
+                  border: '1px solid #28a745',
+                  borderRadius: '8px',
+                  backgroundColor: '#f8fff8',
+                  textAlign: 'center',
                 }}
               >
-                Re-open Project
-              </button>
-            </div>
-          )}
+                <h4
+                  style={{
+                    color: '#28a745',
+                    marginBottom: '10px',
+                    fontSize: '16px',
+                  }}
+                >
+                  🔄 Re-open Project
+                </h4>
+                <p
+                  style={{
+                    color: '#666',
+                    marginBottom: '15px',
+                    fontSize: '14px',
+                  }}
+                >
+                  This project is currently cancelled. You can reopen it to make
+                  it available for freelancers to bid on again.
+                </p>
+                <button
+                  onClick={handleReopenProject}
+                  style={{
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    padding: '10px 20px',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.3s',
+                  }}
+                  onMouseEnter={e => {
+                    e.target.style.backgroundColor = '#218838';
+                  }}
+                  onMouseLeave={e => {
+                    e.target.style.backgroundColor = '#28a745';
+                  }}
+                >
+                  Re-open Project
+                </button>
+              </div>
+            )}
 
           {/* Separator line */}
-          {user && user.role === 'client' && project.clientId._id === user.id && 
-           project.status !== 'closed' && project.status !== 'cancelled' && (
-            <hr style={{ 
-              margin: '20px 0', 
-              border: 'none', 
-              borderTop: '1px solid #e9ecef' 
-            }} />
-          )}
+          {user &&
+            user.role === 'client' &&
+            project.clientId._id === user.id &&
+            project.status !== 'closed' &&
+            project.status !== 'cancelled' && (
+              <hr
+                style={{
+                  margin: '20px 0',
+                  border: 'none',
+                  borderTop: '1px solid #e9ecef',
+                }}
+              />
+            )}
 
           {/* Cancel Project Button - Only for project owner (client) */}
-          {user && user.role === 'client' && project.clientId._id === user.id && 
-           project.status !== 'closed' && project.status !== 'cancelled' && (
-            <div style={{ 
-              marginTop: '20px', 
-              textAlign: 'center'
-            }}>
-              <h4 style={{ color: '#dc3545', marginBottom: '15px' }}>⚠️ Cancel Project</h4>
-              <p style={{ color: '#666', marginBottom: '20px' }}>
-                This action cannot be undone. If a freelancer is working on this project, they will be notified.
-              </p>
-              <button
-                onClick={handleCancelProject}
+          {user &&
+            user.role === 'client' &&
+            project.clientId._id === user.id &&
+            project.status !== 'closed' &&
+            project.status !== 'cancelled' && (
+              <div
                 style={{
-                  backgroundColor: '#dc3545',
-                  color: 'white',
-                  border: 'none',
-                  padding: '12px 24px',
-                  borderRadius: '6px',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.3s'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = '#c82333';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = '#dc3545';
+                  marginTop: '20px',
+                  textAlign: 'center',
                 }}
               >
-                Cancel Project
-              </button>
-            </div>
-          )}
+                <h4 style={{ color: '#dc3545', marginBottom: '15px' }}>
+                  ⚠️ Cancel Project
+                </h4>
+                <p style={{ color: '#666', marginBottom: '20px' }}>
+                  If a freelancer is working on this project, they will be
+                  notified.
+                </p>
+                <button
+                  onClick={handleCancelProject}
+                  style={{
+                    backgroundColor: '#dc3545',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '6px',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.3s',
+                  }}
+                  onMouseEnter={e => {
+                    e.target.style.backgroundColor = '#c82333';
+                  }}
+                  onMouseLeave={e => {
+                    e.target.style.backgroundColor = '#dc3545';
+                  }}
+                >
+                  Cancel Project
+                </button>
+              </div>
+            )}
         </div>
 
         {canManageBids && (
@@ -811,7 +975,7 @@ const ProjectDetail = () => {
                       borderRadius: '4px',
                       cursor: 'pointer',
                     }}
-                    onClick={(e) => {
+                    onClick={e => {
                       // Only navigate if clicking on the card itself, not on buttons
                       if (e.target.tagName !== 'BUTTON') {
                         navigate(`/projects/${id}/bids/${bid._id}`);
@@ -907,10 +1071,11 @@ const ProjectDetail = () => {
                               Edit Bid
                             </button>
                           )}
-                        
+
                         {/* Cancel Bid button - show for freelancers on their own pending and accepted bids */}
                         {!canViewAllBids &&
-                          (bid.status === 'pending' || bid.status === 'accepted') &&
+                          (bid.status === 'pending' ||
+                            bid.status === 'accepted') &&
                           user &&
                           user.role === 'freelancer' &&
                           (bid.freelancerId._id || bid.freelancerId) ===
@@ -940,7 +1105,6 @@ const ProjectDetail = () => {
           </div>
         )}
       </div>
-
     </div>
   );
 };

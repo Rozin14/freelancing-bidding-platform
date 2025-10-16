@@ -79,6 +79,12 @@ function App() {
                 </ProtectedRoute>
               } />
               
+              <Route path="/projects/:id/edit" element={
+                <ProtectedRoute allowedRoles={['client']}>
+                  <CreateProject />
+                </ProtectedRoute>
+              } />
+              
               <Route path="/admin" element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <AdminPanel />

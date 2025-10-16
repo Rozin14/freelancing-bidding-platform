@@ -326,6 +326,52 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Update project (only by project owner/client)
+router.put('/:id', authenticateToken, async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Only project owner (client) can update project
+    if (project.clientId.toString() !== req.user.id) {
+      return res.status(403).json({
+        message: 'Only the project owner can update the project'
+      });
+    }
+
+    // Check if project can be updated (not closed or cancelled)
+    if (project.status === 'closed' || project.status === 'cancelled') {
+      return res.status(400).json({
+        message: 'Project cannot be updated as it is closed or cancelled'
+      });
+    }
+
+    // Update project fields
+    const allowedUpdates = ['title', 'description', 'budget', 'requiredSkills', 'deadline'];
+    allowedUpdates.forEach(field => {
+      if (req.body[field] !== undefined) {
+        project[field] = req.body[field];
+      }
+    });
+
+    project.updatedAt = new Date();
+    await project.save();
+    await project.populate('clientId', 'username profile isActive');
+    await project.populate('freelancerId', 'username profile isActive');
+
+    res.json({
+      message: 'Project updated successfully',
+      project
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: 'Error updating project', error: error.message });
+  }
+});
+
 // Cancel project (only by project owner/client)
 router.put('/:id/cancel', authenticateToken, async (req, res) => {
   try {

@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import './CreateProject.css';
 
 const CreateProject = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const { user } = useAuth();
+  const isEditMode = Boolean(id);
+  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -14,7 +19,48 @@ const CreateProject = () => {
   });
   const [skillsInput, setSkillsInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingProject, setLoadingProject] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (isEditMode) {
+      fetchProject();
+    }
+  }, [id]);
+
+  const fetchProject = async () => {
+    try {
+      setLoadingProject(true);
+      const response = await axios.get(`/api/projects/${id}`);
+      const project = response.data;
+      
+      // Check if user is the owner of the project
+      if (user?.role !== 'client' || project.clientId._id !== user.id) {
+        setError('You are not authorized to edit this project');
+        return;
+      }
+
+      // Check if project can be edited
+      if (project.status === 'closed' || project.status === 'cancelled') {
+        setError('This project cannot be edited as it is closed or cancelled');
+        return;
+      }
+
+      // Populate form with existing project data
+      setFormData({
+        title: project.title || '',
+        description: project.description || '',
+        budget: project.budget?.toString() || '',
+        requiredSkills: project.requiredSkills || [],
+        deadline: project.deadline ? new Date(project.deadline).toISOString().split('T')[0] : ''
+      });
+    } catch (error) {
+      console.error('Error fetching project:', error);
+      setError(error.response?.data?.message || 'Error loading project');
+    } finally {
+      setLoadingProject(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -56,20 +102,59 @@ const CreateProject = () => {
         deadline: formData.deadline ? new Date(formData.deadline) : null
       };
 
-      const response = await axios.post('/api/projects', projectData);
-      navigate(`/projects/${response.data._id}`);
+      if (isEditMode) {
+        // Update existing project
+        await axios.put(`/api/projects/${id}`, projectData);
+        navigate(`/projects/${id}`);
+      } else {
+        // Create new project
+        const response = await axios.post('/api/projects', projectData);
+        navigate(`/projects/${response.data._id}`);
+      }
     } catch (error) {
-      setError(error.response?.data?.message || 'Error creating project');
+      setError(error.response?.data?.message || `Error ${isEditMode ? 'updating' : 'creating'} project`);
     } finally {
       setLoading(false);
     }
   };
 
+  if (loadingProject) {
+    return (
+      <div className="container">
+        <div className="flex-center create-project-container">
+          <div className="loading">Loading project details...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && (error.includes('not authorized') || error.includes('cannot be edited'))) {
+    return (
+      <div className="container">
+        <div className="flex-center create-project-container">
+          <div className="card create-project-card">
+            <div className="alert alert-error text-center">
+              {error}
+            </div>
+            <div className="text-center mt-20">
+              <button
+                className="btn btn-secondary"
+                onClick={() => navigate(isEditMode ? `/projects/${id}` : '/projects')}
+              >
+                Back to {isEditMode ? 'Project' : 'Projects'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container">
       <div className="flex-center create-project-container">
         <div className="card create-project-card">
-          <h2 className="text-center mb-20">Create New Project</h2>
+          <h2 className="text-center mb-20">{isEditMode ? 'Edit Project' : 'Create New Project'}</h2>
           
           {error && (
             <div className="alert alert-error">
@@ -164,17 +249,18 @@ const CreateProject = () => {
             <div className="flex gap-10">
               <button
                 type="submit"
-                className="btn btn-primary"
+                className="btn btn-primary btn-flex"
                 disabled={loading}
-                className="btn-flex"
               >
-                {loading ? 'Creating Project...' : 'Create Project'}
+                {loading 
+                  ? (isEditMode ? 'Updating Project...' : 'Creating Project...') 
+                  : (isEditMode ? 'Update Project' : 'Create Project')
+                }
               </button>
               <button
                 type="button"
-                className="btn btn-secondary"
-                onClick={() => navigate('/projects')}
-                className="btn-flex"
+                className="btn btn-secondary btn-flex"
+                onClick={() => navigate(isEditMode ? `/projects/${id}` : '/projects')}
               >
                 Cancel
               </button>
