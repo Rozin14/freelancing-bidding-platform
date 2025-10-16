@@ -1,0 +1,19 @@
+.admin-register-container {
+  min-height: calc(100vh - 80px);
+}
+
+.admin-register-card {
+  width: 400px;
+}
+
+.admin-register-description {
+  color: #666;
+}
+
+.btn-full-width {
+  width: 100%;
+}
+
+.btn-flex {
+  flex: 1;
+}

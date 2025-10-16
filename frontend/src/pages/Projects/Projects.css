@@ -1,0 +1,20 @@
+.project-title-link {
+  text-decoration: none;
+  color: #007bff;
+}
+
+.project-description {
+  margin: 10px 0;
+  color: #666;
+}
+
+.client-link {
+  margin-left: 5px;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.project-meta {
+  font-size: 14px;
+  color: #888;
+}

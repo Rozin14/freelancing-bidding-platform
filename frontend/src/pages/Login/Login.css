@@ -1,0 +1,11 @@
+.login-container {
+  min-height: calc(100vh - 80px);
+}
+
+.login-card {
+  width: 400px;
+}
+
+.btn-full-width {
+  width: 100%;
+}

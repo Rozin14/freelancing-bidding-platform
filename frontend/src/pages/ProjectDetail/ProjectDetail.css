@@ -1,0 +1,54 @@
+.bid-card:hover {
+  background-color: #f8f9fa;
+  border-color: #007bff;
+}
+
+.freelancer-link:hover {
+  color: #0056b3 !important;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.875em;
+}
+
+.flex {
+  display: flex;
+}
+
+.gap-10 {
+  gap: 10px;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-open {
+  background-color: #28a745;
+  color: white;
+}
+
+.status-in_progress {
+  background-color: #007bff;
+  color: white;
+}
+
+.status-completed {
+  background-color: #ffc107;
+  color: #856404;
+}
+
+.status-closed {
+  background-color: #6c757d;
+  color: white;
+}
+
+.status-cancelled {
+  background-color: #dc3545;
+  color: white;
+}

@@ -1,0 +1,20 @@
+.user-card, .project-card {
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+.user-info, .project-info {
+  font-size: 14px;
+  color: #888;
+}
+
+.project-description {
+  color: #666;
+}
+
+.client-link, .freelancer-link {
+  margin-left: 5px;
+  color: #007bff;
+  text-decoration: none;
+}

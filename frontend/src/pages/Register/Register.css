@@ -1,0 +1,15 @@
+.register-container {
+  min-height: calc(100vh - 80px);
+}
+
+.register-card {
+  width: 500px;
+}
+
+.skill-tag-removable {
+  cursor: pointer;
+}
+
+.btn-full-width {
+  width: 100%;
+}

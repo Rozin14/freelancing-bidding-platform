@@ -1,0 +1,15 @@
+.create-project-container {
+  min-height: calc(100vh - 80px);
+}
+
+.create-project-card {
+  width: 600px;
+}
+
+.skill-tag-removable {
+  cursor: pointer;
+}
+
+.btn-flex {
+  flex: 1;
+}
