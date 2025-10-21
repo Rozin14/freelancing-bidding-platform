@@ -233,3 +233,44 @@
 .mt-10 {
   margin-top: 10px;
 }
+
+/* Additional FreelancerProfile Styles */
+.portfolio-item {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.no-portfolio {
+  color: #666;
+  font-style: italic;
+}
+
+.contact-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.contact-button:hover {
+  background-color: #0056b3;
+}
+
+.account-status-suspended {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 10px;
+}

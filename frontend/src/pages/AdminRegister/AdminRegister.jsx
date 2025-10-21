@@ -134,8 +134,8 @@ const AdminRegister = () => {
 
   return (
     <div className="container">
-      <div className="flex-center" style={{ minHeight: 'calc(100vh - 80px)' }}>
-        <div className="card" style={{ width: '400px' }}>
+      <div className="flex-center" className="admin-register-container">
+        <div className="card" className="card admin-register-card">
           <h2 className="text-center mb-20">Register New Admin</h2>
 
           {error && (

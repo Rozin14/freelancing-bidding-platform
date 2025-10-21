@@ -47,3 +47,85 @@
     box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
   }
 }
+
+/* Dashboard Project Card Styles */
+.project-card {
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+.project-link {
+  text-decoration: none;
+  color: #007bff;
+}
+
+.project-description {
+  margin: 5px 0;
+  color: #666;
+}
+
+.project-meta {
+  align-items: center;
+}
+
+.project-meta-text {
+  margin: 0;
+  font-size: 14px;
+  color: #888;
+}
+
+.delete-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
+}
+
+/* Bid Card Styles */
+.bid-card-clickable {
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.bid-card-clickable:hover {
+  background-color: #f8f9fa;
+  border-color: #007bff;
+}
+
+.freelancer-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.freelancer-link:hover {
+  color: #0056b3;
+}
+
+.bid-description {
+  margin: 5px 0;
+  color: #666;
+}
+
+.bid-meta {
+  margin: 0;
+  font-size: 14px;
+  color: #888;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.875em;
+}

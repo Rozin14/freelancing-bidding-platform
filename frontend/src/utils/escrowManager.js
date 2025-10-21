@@ -235,7 +235,7 @@ export const createEscrowNotification = (type, escrow) => {
       notification = {
         id: `escrow_notif_${Date.now()}`,
         type: 'escrow_funds_released',
-        content: `Admin has released ₹${escrow.amount} to freelancer for project "${escrow.projectTitle}".`,
+        content: `🎊🎉 AMAZING NEWS! 🎉🎊\n\n💰 Your payment of ₹${escrow.amount} has been successfully released!\n\n📋 Project: "${escrow.projectTitle}"\n✅ Status: Payment Completed\n🏦 Funds are now available in your account`,
         projectId: escrow.projectId,
         escrowId: escrow.id,
         toUserId: escrow.freelancerId,

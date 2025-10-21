@@ -95,7 +95,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar" style={{ padding: '0 20px' }}>
+    <nav className="navbar" className="navbar">
       <div className="container">
         <div className="flex-between navbar-container">
           <Link to="/" className="brand-link">

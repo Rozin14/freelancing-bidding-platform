@@ -275,12 +275,12 @@ const BidDetail = () => {
           
           <div className="mb-20">
             <div className="flex-between mb-10">
-              <h3>Project: <Link to={`/projects/${projectId}`} style={{ color: '#007bff', textDecoration: 'none' }}>{project.title}</Link></h3>
+              <h3>Project: <Link to={`/projects/${projectId}`} className="project-link">{project.title}</Link></h3>
               <span className={`status-badge status-${bid.status}`}>
                 {bid.status === 'accepted' ? 'Assigned' : bid.status}
               </span>
             </div>
-            <p style={{ color: '#666' }}>{project.description.substring(0, 200)}...</p>
+            <p className="project-description">{project.description.substring(0, 200)}...</p>
           </div>
 
           <div className="bid-details">
@@ -425,17 +425,20 @@ const BidDetail = () => {
               >
                 ✅ Approve Work & Release Funds
               </button>
-              <div style={{
-                marginTop: '10px',
-                padding: '10px',
-                backgroundColor: '#d4edda',
-                border: '1px solid #c3e6cb',
-                borderRadius: '6px',
-                fontSize: '14px',
-                color: '#155724'
-              }}>
-                💡 <strong>Work Approved:</strong> Admin will release ₹{existingEscrow.amount} to the freelancer.
-              </div>
+              {/* Only show "Work Approved" message if escrow status is ready_for_release */}
+              {existingEscrow.status === 'ready_for_release' && (
+                <div style={{
+                  marginTop: '10px',
+                  padding: '10px',
+                  backgroundColor: '#d4edda',
+                  border: '1px solid #c3e6cb',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  color: '#155724'
+                }}>
+                  💡 <strong>Work Approved:</strong> Admin will release ₹{existingEscrow.amount} to the freelancer.
+                </div>
+              )}
             </div>
           )}
 

@@ -147,3 +147,41 @@
   margin-top: 20px;
   text-align: center;
 }
+
+/* Additional BidDetail Styles */
+.project-link {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.project-description {
+  color: #666;
+}
+
+.escrow-info {
+  background-color: #e3f2fd;
+  border: 1px solid #2196f3;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.escrow-info h4 {
+  margin: 0 0 10px 0;
+  color: #1976d2;
+}
+
+.escrow-detail {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.work-approved-message {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #155724;
+}

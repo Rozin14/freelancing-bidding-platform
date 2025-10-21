@@ -95,10 +95,10 @@ const Dashboard = () => {
               {dashboardData.projects?.length > 0 ? (
                 <div>
                   {dashboardData.projects.slice(0, 5).map(project => (
-                    <div key={project._id} className="mb-20" style={{ padding: '10px', border: '1px solid #eee', borderRadius: '4px' }}>
+                    <div key={project._id} className="mb-20 project-card">
                       <div className="flex-between">
                         <div className="flex gap-10 align-center">
-                          <Link to={`/projects/${project._id}`} style={{ textDecoration: 'none', color: '#007bff' }}>
+                          <Link to={`/projects/${project._id}`} className="project-link">
                             <strong>{project.title}</strong>
                           </Link>
                           {/* Show bid count badge only if there are pending bids and no bid is accepted */}
@@ -239,9 +239,9 @@ const Dashboard = () => {
               {dashboardData.bids?.length > 0 ? (
                 <div>
                   {dashboardData.bids.slice(0, 5).map(bid => (
-                    <div key={bid._id} className="mb-20" style={{ padding: '10px', border: '1px solid #eee', borderRadius: '4px' }}>
+                    <div key={bid._id} className="mb-20 project-card">
                       <div className="flex-between">
-                        <Link to={`/projects/${bid.projectId?._id}`} style={{ textDecoration: 'none', color: '#007bff' }}>
+                        <Link to={`/projects/${bid.projectId?._id}`} className="project-link">
                           <strong>{bid.projectId?.title}</strong>
                         </Link>
                         <span className={`status-badge status-${bid.status}`}>
@@ -265,9 +265,9 @@ const Dashboard = () => {
               {dashboardData.projects?.length > 0 ? (
                 <div>
                   {dashboardData.projects.slice(0, 5).map(project => (
-                    <div key={project._id} className="mb-20" style={{ padding: '10px', border: '1px solid #eee', borderRadius: '4px' }}>
+                    <div key={project._id} className="mb-20 project-card">
                       <div className="flex-between">
-                        <Link to={`/projects/${project._id}`} style={{ textDecoration: 'none', color: '#007bff' }}>
+                        <Link to={`/projects/${project._id}`} className="project-link">
                           <strong>{project.title}</strong>
                         </Link>
                         <span className={`status-badge status-${project.status}`}>
@@ -300,7 +300,7 @@ const Dashboard = () => {
             <div className="card">
               <h3>Recent Reviews</h3>
               {dashboardData.reviews.slice(0, 3).map(review => (
-                <div key={review._id} className="mb-20" style={{ padding: '10px', border: '1px solid #eee', borderRadius: '4px' }}>
+                <div key={review._id} className="mb-20 project-card">
                   <div className="flex-between">
                     <Link
                       to={`/profile/${review.clientId?._id}`}

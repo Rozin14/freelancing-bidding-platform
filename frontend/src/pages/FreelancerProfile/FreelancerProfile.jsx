@@ -201,17 +201,7 @@ const FreelancerProfile = () => {
             
             {/* Account Status */}
             {freelancer.isActive === false && (
-              <div style={{
-                display: 'inline-block',
-                padding: '6px 12px',
-                backgroundColor: '#f8d7da',
-                color: '#721c24',
-                border: '1px solid #f5c6cb',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                marginTop: '10px'
-              }}>
+              <div className="account-status-suspended">
                 ⚠️ Account Suspended
               </div>
             )}
@@ -307,7 +297,7 @@ const FreelancerProfile = () => {
           !canReview && (
             <div className="card">
               <h3>Leave a Review</h3>
-              <p style={{ color: '#666', fontStyle: 'italic' }}>
+              <p className="no-portfolio">
                 You can only review freelancers after completing at least one
                 project with them.
               </p>
