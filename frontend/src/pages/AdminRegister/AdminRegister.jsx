@@ -204,17 +204,15 @@ const AdminRegister = () => {
             <div className="flex gap-10">
               <button
                 type="button"
-                className="btn btn-secondary"
+                className="btn btn-secondary btn-flex"
                 onClick={() => setStep(1)}
-                className="btn-flex"
               >
                 Back
               </button>
               <button
                 type="submit"
-                className="btn btn-primary"
+                className="btn btn-primary btn-flex"
                 disabled={loading}
-                className="btn-flex"
               >
                 {loading ? 'Registering...' : 'Register Admin'}
               </button>

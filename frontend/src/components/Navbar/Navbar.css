@@ -19,7 +19,8 @@
   font-weight: bold;
 }
 
-.messages-link {
+.messages-link,
+.escrow-link {
   position: relative;
 }
 

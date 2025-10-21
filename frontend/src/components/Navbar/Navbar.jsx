@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { getEscrowNotificationsCount } from '../../utils/escrowManager';
 import './Navbar.css';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [notificationCount, setNotificationCount] = useState(0);
+  const [escrowNotificationCount, setEscrowNotificationCount] = useState(0);
 
   useEffect(() => {
     const loadNotificationCount = () => {
@@ -18,7 +20,7 @@ const Navbar = () => {
         if (storedNotifications) {
           const notifications = JSON.parse(storedNotifications);
           const userNotifications = notifications.filter(notification => 
-            notification.to === user.id && !notification.isRead
+            (notification.to === user.id || notification.toUserId === user.id) && !notification.isRead
           );
           count += userNotifications.length;
         }
@@ -60,8 +62,12 @@ const Navbar = () => {
         } else {
           setNotificationCount(0);
         }
+        
+        // Count escrow notifications for admin
+        setEscrowNotificationCount(getEscrowNotificationsCount());
       } else {
         setNotificationCount(0);
+        setEscrowNotificationCount(0);
       }
     };
 
@@ -114,6 +120,16 @@ const Navbar = () => {
                     </span>
                   )}
                 </Link>
+                {user.role === 'admin' && (
+                  <Link to="/escrow" className="btn btn-secondary escrow-link">
+                    💰 Escrow
+                    {escrowNotificationCount > 0 && (
+                      <span className="notification-badge">
+                        {escrowNotificationCount > 99 ? '99+' : escrowNotificationCount}
+                      </span>
+                    )}
+                  </Link>
+                )}
                 
                 {user.role === 'client' && (
                   <Link to="/create-project" className="btn btn-primary">Post Project</Link>

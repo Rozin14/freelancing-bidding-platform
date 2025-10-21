@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { getAllEscrows, updateEscrowStatus } from '../../utils/escrowManager';
 import axios from 'axios';
 import './ProjectDetail.css';
 
@@ -20,6 +21,7 @@ const ProjectDetail = () => {
   const [submitting, setSubmitting] = useState(false);
   const [editingBid, setEditingBid] = useState(null);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [projectEscrow, setProjectEscrow] = useState(null);
 
   useEffect(() => {
     fetchProjectDetails();
@@ -33,6 +35,12 @@ const ProjectDetail = () => {
       console.log('Client data:', projectResponse.data.clientId);
       console.log('Client isActive:', projectResponse.data.clientId?.isActive);
       setProject(projectResponse.data);
+
+      // Check for escrow
+      const escrows = getAllEscrows();
+      const escrow = escrows.find(e => e.projectId === id);
+      console.log('ProjectDetail - Found escrow for project:', id, escrow);
+      setProjectEscrow(escrow);
 
       // Fetch bids if user is the project owner (client) or a freelancer (to check if they've already bid)
       if (
@@ -290,12 +298,35 @@ const ProjectDetail = () => {
   };
 
   const handleMarkCompleted = async () => {
-    if (
-      window.confirm('Are you sure you want to mark this project as completed?')
-    ) {
+    // Check if there's an escrow for this project
+    const escrows = getAllEscrows();
+    const projectEscrow = escrows.find(e => e.projectId === id);
+    
+    let confirmMessage = 'Are you sure you want to mark this project as completed?';
+    
+    // If no escrow exists, warn the freelancer
+    if (!projectEscrow) {
+      confirmMessage = '⚠️ WARNING: The client hasn\'t sent funds to escrow yet.\n\n' +
+                      'This means:\n' +
+                      '• Your payment is not secured\n' +
+                      '• The client could potentially not pay you\n' +
+                      '• You won\'t have escrow protection\n\n' +
+                      'Still mark as completed?';
+    }
+    
+    if (window.confirm(confirmMessage)) {
       try {
         const response = await axios.put(`/api/projects/${id}/complete`);
         fetchProjectDetails(); // Refresh data
+
+        // Check if there's an escrow for this project and update its status
+        const escrows = getAllEscrows();
+        const projectEscrow = escrows.find(e => e.projectId === id);
+        
+        if (projectEscrow && projectEscrow.status === 'pending') {
+          // Update escrow status to in_progress when freelancer marks work as completed
+          await updateEscrowStatus(projectEscrow.id, 'in_progress', 'Freelancer marked work as completed');
+        }
 
         // Handle platform notification if present
         if (response.data.notification) {
@@ -642,6 +673,33 @@ const ProjectDetail = () => {
                     </span>
                   )}
               </p>
+
+              {/* Escrow Status for Freelancer */}
+              {user &&
+                user.role === 'freelancer' &&
+                project.freelancerId._id === user.id &&
+                project.status === 'in_progress' && (
+                  <div className="mt-20">
+                    {(() => {
+                      console.log('ProjectDetail - Escrow check:', {
+                        projectEscrow,
+                        hasEscrow: !!projectEscrow,
+                        status: projectEscrow?.status,
+                        amount: projectEscrow?.amount,
+                        projectId: id
+                      });
+                      return projectEscrow && projectEscrow.status && projectEscrow.status !== 'cancelled' && projectEscrow.amount > 0;
+                    })() ? (
+                      <div className="alert alert-success">
+                        <strong>✅ Escrow Protected:</strong> Client has sent ₹{projectEscrow.amount} to escrow. Your payment is secured.
+                      </div>
+                    ) : (
+                      <div className="alert alert-warning">
+                        <strong>⚠️ No Escrow:</strong> Client hasn't sent funds to escrow yet. Your payment is not secured.
+                      </div>
+                    )}
+                  </div>
+                )}
 
               {/* Show "Mark as Completed" button for the assigned freelancer */}
               {user &&
@@ -1026,7 +1084,7 @@ const ProjectDetail = () => {
 
                     <div className="flex-between">
                       <div style={{ fontSize: '14px', color: '#888' }}>
-                        {new Date(bid.createdAt).toLocaleDateString()}
+                        {new Date(bid.createdAt).toLocaleDateString()} at {new Date(bid.createdAt).toLocaleTimeString()}
                       </div>
 
                       <div className="flex gap-10">

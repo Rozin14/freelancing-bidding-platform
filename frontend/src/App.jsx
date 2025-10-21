@@ -14,6 +14,7 @@ import AdminRegister from './pages/AdminRegister/AdminRegister';
 import BidDetail from './pages/BidDetail/BidDetail';
 import FreelancerProfile from './pages/FreelancerProfile/FreelancerProfile';
 import MessagingSystem from './components/MessagingSystem/MessagingSystem';
+import EscrowPage from './pages/EscrowPage/EscrowPage';
 import './App.css';
 
 function ProtectedRoute({ children, allowedRoles }) {
@@ -94,6 +95,12 @@ function App() {
               <Route path="/messages" element={
                 <ProtectedRoute>
                   <MessagingSystem />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/escrow" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <EscrowPage />
                 </ProtectedRoute>
               } />
               

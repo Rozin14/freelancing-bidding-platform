@@ -97,9 +97,17 @@ const Dashboard = () => {
                   {dashboardData.projects.slice(0, 5).map(project => (
                     <div key={project._id} className="mb-20" style={{ padding: '10px', border: '1px solid #eee', borderRadius: '4px' }}>
                       <div className="flex-between">
-                        <Link to={`/projects/${project._id}`} style={{ textDecoration: 'none', color: '#007bff' }}>
-                          <strong>{project.title}</strong>
-                        </Link>
+                        <div className="flex gap-10 align-center">
+                          <Link to={`/projects/${project._id}`} style={{ textDecoration: 'none', color: '#007bff' }}>
+                            <strong>{project.title}</strong>
+                          </Link>
+                          {/* Show bid count badge only if there are pending bids and no bid is accepted */}
+                          {project.bidCount > 0 && !project.hasAcceptedBid && (
+                            <span className="bid-count-badge">
+                              {project.bidCount} bid{project.bidCount !== 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
                         <span className={`status-badge status-${project.status}`}>
                           {project.status === 'closed' ? 'completed and closed' : 
                            project.status === 'cancelled' ? 'cancelled' : 
@@ -180,7 +188,7 @@ const Dashboard = () => {
                         {bid.proposal.substring(0, 100)}...
                       </p>
                       <p style={{ margin: '0', fontSize: '14px', color: '#888' }}>
-                        Amount: ₹{bid.amount} | Timeline: {bid.timeline}
+                        Amount: ₹{bid.amount} | Timeline: {bid.timeline} | Bid Date: {new Date(bid.createdAt).toLocaleDateString()} {new Date(bid.createdAt).toLocaleTimeString()}
                       </p>
                       <div className="bid-actions" style={{ marginTop: '10px' }}>
                         <button
@@ -242,7 +250,7 @@ const Dashboard = () => {
                       </div>
                       <p style={{ margin: '5px 0', color: '#666' }}>{bid.proposal.substring(0, 100)}...</p>
                       <p style={{ margin: '0', fontSize: '14px', color: '#888' }}>
-                        Amount: ₹{bid.amount} | Timeline: {bid.timeline}
+                        Amount: ₹{bid.amount} | Timeline: {bid.timeline} | Bid Date: {new Date(bid.createdAt).toLocaleDateString()} {new Date(bid.createdAt).toLocaleTimeString()}
                       </p>
                     </div>
                   ))}

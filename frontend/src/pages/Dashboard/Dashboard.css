@@ -19,3 +19,31 @@
 .gap-10 {
   gap: 10px;
 }
+
+.align-center {
+  align-items: center;
+}
+
+.bid-count-badge {
+  background: #28a745;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+  animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+  0% {
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.6);
+  }
+  100% {
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+  }
+}

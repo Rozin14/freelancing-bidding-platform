@@ -32,7 +32,7 @@ const MessagingSystem = () => {
       const notifications = JSON.parse(storedNotifications);
       // Filter notifications for current user (both read and unread for display)
       const userNotifications = notifications.filter(notification => 
-        notification.to === user.id
+        notification.to === user.id || notification.toUserId === user.id
       );
       setPlatformNotifications(userNotifications);
     }
@@ -44,7 +44,7 @@ const MessagingSystem = () => {
     if (storedNotifications) {
       const notifications = JSON.parse(storedNotifications);
       return notifications.filter(notification => 
-        notification.to === user.id && 
+        (notification.to === user.id || notification.toUserId === user.id) && 
         notification.projectId === projectId &&
         !notification.isRead
       ).length;
@@ -72,13 +72,19 @@ const MessagingSystem = () => {
       setLoading(true);
       let projects = [];
       
+      if (!user || !user.id) {
+        console.error('User not properly loaded:', user);
+        setLoading(false);
+        return;
+      }
+      
       if (user.role === 'client') {
         // Get projects where this client has accepted bids
         const response = await axios.get('/api/projects');
         
         // Filter for projects with accepted bids (either in_progress or with accepted bids)
         projects = response.data.filter(project => {
-          const isClientOwner = project.clientId._id === user.id;
+          const isClientOwner = project.clientId?._id === user.id;
           const hasFreelancer = project.freelancerId;
           const isInProgress = project.status === 'in_progress';
           
@@ -89,7 +95,7 @@ const MessagingSystem = () => {
         if (projects.length === 0) {
           try {
             // Get all projects for this client
-            const clientProjects = response.data.filter(project => project.clientId._id === user.id);
+            const clientProjects = response.data.filter(project => project.clientId?._id === user.id);
             
             // For each project, check if there are accepted bids
             for (const project of clientProjects) {
@@ -117,7 +123,7 @@ const MessagingSystem = () => {
         
         // Filter for projects with accepted bids (either in_progress or with accepted bids)
         projects = response.data.filter(project => {
-          const isFreelancerAssigned = project.freelancerId && project.freelancerId._id === user.id;
+          const isFreelancerAssigned = project.freelancerId && project.freelancerId?._id === user.id;
           const isInProgress = project.status === 'in_progress';
           
           return isFreelancerAssigned && (isInProgress || project.status === 'completed');
@@ -136,7 +142,7 @@ const MessagingSystem = () => {
                 
                 const acceptedBid = bidsResponse.data.find(bid => 
                   bid.status === 'accepted' && 
-                  (bid.freelancerId._id === user.id || bid.freelancerId === user.id)
+                  (bid.freelancerId?._id === user.id || bid.freelancerId === user.id)
                 );
                 if (acceptedBid) {
                   projects.push({
@@ -183,6 +189,11 @@ const MessagingSystem = () => {
   };
 
   const loadMessages = () => {
+    if (!user || !user.id) {
+      console.error('User not properly loaded in loadMessages:', user);
+      return;
+    }
+    
     const storedMessages = localStorage.getItem('messages');
     if (storedMessages) {
       const allMessages = JSON.parse(storedMessages);
@@ -218,17 +229,17 @@ const MessagingSystem = () => {
     
     // Add partners from accepted projects (even if no messages exist yet)
     acceptedProjects.forEach(project => {
-      const clientId = project.clientId._id || project.clientId;
-      const freelancerId = project.freelancerId._id || project.freelancerId;
+      const clientId = project.clientId?._id || project.clientId;
+      const freelancerId = project.freelancerId?._id || project.freelancerId;
       
       if (user.role === 'admin') {
         // For admins, add both client and freelancer as potential conversation partners
-        partners.add(clientId);
-        partners.add(freelancerId);
+        if (clientId) partners.add(clientId);
+        if (freelancerId) partners.add(freelancerId);
       } else if (user.id === clientId) {
-        partners.add(freelancerId);
+        if (freelancerId) partners.add(freelancerId);
       } else if (user.id === freelancerId) {
-        partners.add(clientId);
+        if (clientId) partners.add(clientId);
       }
     });
     
@@ -238,8 +249,8 @@ const MessagingSystem = () => {
       allMessages.forEach(msg => {
         // Check if this message is between users who have accepted projects
         const hasAcceptedProject = acceptedProjects.some(project => {
-          const clientId = project.clientId._id || project.clientId;
-          const freelancerId = project.freelancerId._id || project.freelancerId;
+          const clientId = project.clientId?._id || project.clientId;
+          const freelancerId = project.freelancerId?._id || project.freelancerId;
           return (msg.from === clientId && msg.to === freelancerId) ||
                  (msg.from === freelancerId && msg.to === clientId);
         });
@@ -262,8 +273,8 @@ const MessagingSystem = () => {
 
     // Check if user can send message to selected user (they must have accepted projects)
     const canSendMessage = user.role === 'admin' || acceptedProjects.some(project => {
-      const clientId = project.clientId._id || project.clientId;
-      const freelancerId = project.freelancerId._id || project.freelancerId;
+      const clientId = project.clientId?._id || project.clientId;
+      const freelancerId = project.freelancerId?._id || project.freelancerId;
       return (user.id === clientId && selectedUser === freelancerId) ||
              (user.id === freelancerId && selectedUser === clientId);
     });
@@ -292,8 +303,8 @@ const MessagingSystem = () => {
 
   const getProjectIdForConversation = (partnerId) => {
     const project = acceptedProjects.find(project => {
-      const clientId = project.clientId._id || project.clientId;
-      const freelancerId = project.freelancerId._id || project.freelancerId;
+      const clientId = project.clientId?._id || project.clientId;
+      const freelancerId = project.freelancerId?._id || project.freelancerId;
       return (user.id === clientId && partnerId === freelancerId) ||
              (user.id === freelancerId && partnerId === clientId);
     });
@@ -304,14 +315,14 @@ const MessagingSystem = () => {
     if (user.role === 'admin') {
       // For admins, show all messages in the conversation between client and freelancer
       const project = acceptedProjects.find(p => {
-        const clientId = p.clientId._id || p.clientId;
-        const freelancerId = p.freelancerId._id || p.freelancerId;
+        const clientId = p.clientId?._id || p.clientId;
+        const freelancerId = p.freelancerId?._id || p.freelancerId;
         return clientId === partnerId || freelancerId === partnerId;
       });
       
       if (project) {
-        const clientId = project.clientId._id || project.clientId;
-        const freelancerId = project.freelancerId._id || project.freelancerId;
+        const clientId = project.clientId?._id || project.clientId;
+        const freelancerId = project.freelancerId?._id || project.freelancerId;
         
         // Return all messages between client, freelancer, and admin
     return messages.filter(msg => 
@@ -343,16 +354,16 @@ const MessagingSystem = () => {
 
   const getUsernameFromProjects = (partnerId) => {
     const project = acceptedProjects.find(project => {
-      const clientId = project.clientId._id || project.clientId;
-      const freelancerId = project.freelancerId._id || project.freelancerId;
+      const clientId = project.clientId?._id || project.clientId;
+      const freelancerId = project.freelancerId?._id || project.freelancerId;
       return clientId === partnerId || freelancerId === partnerId;
     });
     
     if (project) {
-      if (project.clientId._id === partnerId || project.clientId === partnerId) {
-        return project.clientId.username || project.clientId.name || 'Client';
-      } else if (project.freelancerId._id === partnerId || project.freelancerId === partnerId) {
-        return project.freelancerId.username || project.freelancerId.name || 'Freelancer';
+      if (project.clientId?._id === partnerId || project.clientId === partnerId) {
+        return project.clientId?.username || project.clientId?.name || 'Client';
+      } else if (project.freelancerId?._id === partnerId || project.freelancerId === partnerId) {
+        return project.freelancerId?.username || project.freelancerId?.name || 'Freelancer';
       }
     }
     
@@ -380,15 +391,15 @@ const MessagingSystem = () => {
     if (user.role === 'admin') {
       // For admin, find the project where partnerId is either client or freelancer
       return acceptedProjects.find(project => {
-        const clientId = project.clientId._id || project.clientId;
-        const freelancerId = project.freelancerId._id || project.freelancerId;
+        const clientId = project.clientId?._id || project.clientId;
+        const freelancerId = project.freelancerId?._id || project.freelancerId;
         return clientId === partnerId || freelancerId === partnerId;
       });
     }
     
     return acceptedProjects.find(project => {
-      const clientId = project.clientId._id || project.clientId;
-      const freelancerId = project.freelancerId._id || project.freelancerId;
+      const clientId = project.clientId?._id || project.clientId;
+      const freelancerId = project.freelancerId?._id || project.freelancerId;
       return (user.id === clientId && partnerId === freelancerId) ||
              (user.id === freelancerId && partnerId === clientId);
     });
@@ -926,8 +937,8 @@ const MessagingSystem = () => {
                   {user.role === 'admin' && acceptedProjects.length > 0 ? (
                     // For admins, show all dispute projects
                     acceptedProjects.map(project => {
-                      const clientId = project.clientId._id || project.clientId;
-                      const freelancerId = project.freelancerId._id || project.freelancerId;
+                      const clientId = project.clientId?._id || project.clientId;
+                      const freelancerId = project.freelancerId?._id || project.freelancerId;
                       const isSelected = selectedUser === clientId || selectedUser === freelancerId;
                       const displayPartnerId = clientId; // Default to showing client
                       

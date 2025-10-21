@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       // Verify token and get user info
@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
   const fetchUserProfile = async () => {
     try {
       // Get user info from token since dashboard doesn't return user data
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (token) {
         // Decode token to get user info
         const payload = JSON.parse(atob(token.split('.')[1]));
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
         setUser(userInfo);
       }
     } catch (error) {
-      localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
       delete axios.defaults.headers.common['Authorization'];
     } finally {
       setLoading(false);
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.post(endpoint, { email, password });
       
       const { token, user: userData } = response.data;
-      localStorage.setItem('token', token);
+      sessionStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
       // For admin login, create user object from token since backend doesn't return user data
@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.post('/api/auth/register', userData);
       
       const { token, user: newUser } = response.data;
-      localStorage.setItem('token', token);
+      sessionStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
       setUser(newUser);
@@ -104,7 +104,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
   };

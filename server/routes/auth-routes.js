@@ -120,8 +120,22 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
         projectId: { $in: projects.map(p => p._id) },
       }).populate('freelancerId', 'username profile');
 
+      // Count bids per project and check if any bid is accepted
+      const projectsWithBidCounts = projects.map(project => {
+        const projectBids = bids.filter(bid => bid.projectId.toString() === project._id.toString());
+        const pendingBids = projectBids.filter(bid => bid.status === 'pending');
+        const hasAcceptedBid = projectBids.some(bid => bid.status === 'accepted');
+        
+        return {
+          ...project.toObject(),
+          bidCount: pendingBids.length,
+          hasAcceptedBid: hasAcceptedBid,
+          totalBids: projectBids.length
+        };
+      });
+
       dashboard = {
-        projects,
+        projects: projectsWithBidCounts,
         bids,
         stats: {
           totalProjects: projects.length,

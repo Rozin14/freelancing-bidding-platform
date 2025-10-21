@@ -502,4 +502,41 @@ router.delete('/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// Admin endpoint to close project (when escrow funds are released)
+router.put('/:id/admin-close', authenticateToken, async (req, res) => {
+  try {
+    // Only admins can use this endpoint
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Only admins can close projects via this endpoint' });
+    }
+
+    const project = await Project.findById(req.params.id);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Only allow closing completed or in_progress projects
+    if (project.status !== 'completed' && project.status !== 'in_progress') {
+      return res.status(400).json({
+        message: 'Only completed or in-progress projects can be closed',
+      });
+    }
+
+    // Update project status to closed
+    project.status = 'closed';
+    project.completedAt = new Date();
+    await project.save();
+
+    res.json({ 
+      message: 'Project marked as completed and closed successfully', 
+      project
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error closing project',
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;

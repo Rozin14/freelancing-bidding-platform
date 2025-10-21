@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { createEscrow, getAllEscrows, updateEscrowStatus, createEscrowNotification, ESCROW_NOTIFICATION_TYPES } from '../../utils/escrowManager';
 import axios from 'axios';
 import './BidDetail.css';
 
@@ -13,6 +14,7 @@ const BidDetail = () => {
   const [freelancer, setFreelancer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [existingEscrow, setExistingEscrow] = useState(null);
 
   useEffect(() => {
     fetchBidDetails();
@@ -36,6 +38,11 @@ const BidDetail = () => {
         const freelancerResponse = await axios.get(`/api/auth/profile/${freelancerId}`);
         setFreelancer(freelancerResponse.data);
       }
+
+      // Check for existing escrow
+      const escrows = getAllEscrows();
+      const escrow = escrows.find(e => e.projectId === projectId && e.bidId === bidId);
+      setExistingEscrow(escrow);
 
     } catch (error) {
       console.error('Error fetching bid details:', error);
@@ -73,7 +80,8 @@ const BidDetail = () => {
         }
         
         alert('Bid accepted and freelancer assigned successfully!');
-        navigate(`/projects/${projectId}`);
+        // Don't redirect - stay on page so client can send funds to escrow
+        fetchBidDetails(); // Refresh the page data to show updated bid status
       } catch (error) {
         console.error('Error accepting bid:', error);
         alert('Error accepting bid');
@@ -155,6 +163,68 @@ const BidDetail = () => {
     }
   };
 
+  const handleFundEscrow = async () => {
+    if (!bid || !project || !freelancer) {
+      alert('Unable to create escrow. Missing required information.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Are you sure you want to send ₹${bid.amount} to escrow for this project?\n\n` +
+      `This will:\n` +
+      `- Secure the funds until work is completed\n` +
+      `- Notify the freelancer that they can start working\n` +
+      `- Allow admin to release funds after work approval\n\n` +
+      `Project: ${project.title}\n` +
+      `Freelancer: ${freelancer.username}\n` +
+      `Amount: ₹${bid.amount}`
+    );
+
+    if (confirmed) {
+      try {
+        const escrow = createEscrow(
+          projectId,
+          bidId,
+          user.id,
+          freelancer._id || freelancer.id,
+          bid.amount,
+          project.title
+        );
+
+        // Update escrow with usernames
+        escrow.clientUsername = user.username;
+        escrow.freelancerUsername = freelancer.username;
+        escrow.projectDescription = project.description;
+
+        // Update the escrow in localStorage
+        const escrows = getAllEscrows();
+        const escrowIndex = escrows.findIndex(e => e.id === escrow.id);
+        if (escrowIndex !== -1) {
+          escrows[escrowIndex] = escrow;
+          localStorage.setItem('escrows', JSON.stringify(escrows));
+        }
+
+        setExistingEscrow(escrow);
+        
+        // Send notification to freelancer that funds have been sent to escrow
+        createEscrowNotification(ESCROW_NOTIFICATION_TYPES.FUNDS_SENT_TO_FREELANCER, escrow);
+        
+        alert(
+          `✅ Funds sent to escrow successfully!\n\n` +
+          `₹${bid.amount} has been secured for project "${project.title}".\n` +
+          `The freelancer has been notified and can now start working.\n` +
+          `Admin will be able to release funds after you approve the completed work.`
+        );
+        
+        // Refresh the page to show updated state
+        window.location.reload();
+      } catch (error) {
+        console.error('Error creating escrow:', error);
+        alert('Error creating escrow. Please try again.');
+      }
+    }
+  };
+
   if (loading) {
     return <div className="loading">Loading bid details...</div>;
   }
@@ -226,7 +296,7 @@ const BidDetail = () => {
             
             <div className="detail-row">
               <strong>Submitted:</strong>
-              <span>{new Date(bid.createdAt).toLocaleDateString()}</span>
+              <span>{new Date(bid.createdAt).toLocaleDateString()} at {new Date(bid.createdAt).toLocaleTimeString()}</span>
             </div>
             
             <div className="detail-row">
@@ -255,8 +325,122 @@ const BidDetail = () => {
             </div>
           )}
 
-          {/* Settle Payment Button - Only show for project owner when project is completed and no pending request */}
-          {isProjectOwner && bid.status === 'accepted' && project?.status === 'completed' && !pendingPaymentRequest && (
+          {/* Fund Escrow Button - Only show for project owner after bid is accepted and no escrow exists */}
+          {isProjectOwner && bid.status === 'accepted' && !existingEscrow && (
+            <div className="bid-actions">
+              <button
+                className="btn btn-primary btn-large"
+                onClick={handleFundEscrow}
+                style={{
+                  backgroundColor: '#17a2b8',
+                  borderColor: '#17a2b8',
+                  fontSize: '16px',
+                  padding: '12px 24px'
+                }}
+              >
+                💰 Send Funds to Escrow
+              </button>
+              <div style={{
+                marginTop: '10px',
+                padding: '10px',
+                backgroundColor: '#e3f2fd',
+                border: '1px solid #2196f3',
+                borderRadius: '6px',
+                fontSize: '14px',
+                color: '#1976d2'
+              }}>
+                💡 <strong>Escrow Protection:</strong> Secure your payment until work is completed and approved.
+              </div>
+            </div>
+          )}
+
+          {/* Escrow Status Display */}
+          {existingEscrow && (
+            <div className="bid-actions">
+              <div style={{
+                padding: '15px',
+                backgroundColor: '#f8f9fa',
+                border: '1px solid #dee2e6',
+                borderRadius: '8px',
+                marginBottom: '10px'
+              }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#495057' }}>💰 Escrow Status</h4>
+                <p style={{ margin: '5px 0', fontSize: '14px' }}>
+                  <strong>Amount:</strong> ₹{existingEscrow.amount}
+                </p>
+                <p style={{ margin: '5px 0', fontSize: '14px' }}>
+                  <strong>Status:</strong> 
+                  <span style={{ 
+                    color: existingEscrow.status === 'pending' ? '#ffc107' : 
+                           existingEscrow.status === 'in_progress' ? '#17a2b8' :
+                           existingEscrow.status === 'ready_for_release' ? '#28a745' :
+                           existingEscrow.status === 'released' ? '#6c757d' : '#dc3545',
+                    fontWeight: 'bold',
+                    marginLeft: '5px'
+                  }}>
+                    {existingEscrow.status === 'pending' ? 'Pending Release' :
+                     existingEscrow.status === 'in_progress' ? 'Work In Progress' :
+                     existingEscrow.status === 'ready_for_release' ? 'Ready for Release' :
+                     existingEscrow.status === 'released' ? 'Funds Released' : 'Cancelled'}
+                  </span>
+                </p>
+                <p style={{ margin: '5px 0', fontSize: '14px' }}>
+                  <strong>Created:</strong> {new Date(existingEscrow.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Approve Work for Escrow Release - Only show for project owner when project is completed and escrow exists */}
+          {isProjectOwner && bid.status === 'accepted' && project?.status === 'completed' && existingEscrow && existingEscrow.status === 'in_progress' && (
+            <div className="bid-actions">
+              <button
+                className="btn btn-success btn-large"
+                onClick={async () => {
+                  const confirmed = window.confirm(
+                    `Are you satisfied with the completed work?\n\n` +
+                    `This will notify the admin that funds are ready to be released to the freelancer.\n\n` +
+                    `Amount to be released: ₹${existingEscrow.amount}`
+                  );
+                  
+                  if (confirmed) {
+                    try {
+                      // Update escrow status to ready for release
+                      await updateEscrowStatus(existingEscrow.id, 'ready_for_release', 'Client approved completed work');
+                      
+                      alert('✅ Work approved! Admin has been notified to release funds to the freelancer.');
+                      window.location.reload();
+                    } catch (error) {
+                      console.error('Error updating escrow status:', error);
+                      alert('Error approving work. Please try again.');
+                    }
+                  }
+                }}
+                style={{
+                  backgroundColor: '#28a745',
+                  borderColor: '#28a745',
+                  fontSize: '16px',
+                  padding: '12px 24px'
+                }}
+              >
+                ✅ Approve Work & Release Funds
+              </button>
+              <div style={{
+                marginTop: '10px',
+                padding: '10px',
+                backgroundColor: '#d4edda',
+                border: '1px solid #c3e6cb',
+                borderRadius: '6px',
+                fontSize: '14px',
+                color: '#155724'
+              }}>
+                💡 <strong>Work Approved:</strong> Admin will release ₹{existingEscrow.amount} to the freelancer.
+              </div>
+            </div>
+          )}
+
+          {/* Settle Payment Button - Only show for project owner when project is completed and no escrow exists */}
+          {isProjectOwner && bid.status === 'accepted' && project?.status === 'completed' && !pendingPaymentRequest && !existingEscrow && (
             <div className="bid-actions">
               <button
                 className="btn btn-primary btn-large"
