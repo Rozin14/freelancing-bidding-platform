@@ -88,21 +88,35 @@ const AdminRegister = () => {
 
   if (step === 1) {
     return (
-      <div className="container">
-        <div
-          className="flex-center admin-register-container"
-        >
-          <div className="card admin-register-card">
-            <h2 className="text-center mb-20">Admin Registration</h2>
-            <p className="text-center mb-20 admin-register-description">
-              Enter the admin passcode to proceed with registration
-            </p>
+      <div className="admin-register-page">
+        <div className="admin-register-container">
+          <div className="admin-register-card">
+            <div className="admin-register-header">
+              <h1 className="admin-register-title">Admin Registration</h1>
+              <p className="admin-register-subtitle">Enter the admin passcode to proceed with registration</p>
+            </div>
 
-            {error && <div className="alert alert-error">{error}</div>}
+            {error && (
+              <div className="admin-register-error">
+                <svg className="error-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                  <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" strokeWidth="2"/>
+                  <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+                {error}
+              </div>
+            )}
 
-            <form onSubmit={verifyPasscode}>
+            <form onSubmit={verifyPasscode} className="admin-register-form">
               <div className="form-group">
-                <label className="form-label">Admin Passcode</label>
+                <label className="form-label">
+                  <svg className="label-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
+                    <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                    <path d="M7 11V7A5 5 0 0 1 17 7V11" stroke="currentColor" strokeWidth="2"/>
+                  </svg>
+                  Admin Passcode
+                </label>
                 <input
                   type="password"
                   className="form-input"
@@ -115,16 +129,25 @@ const AdminRegister = () => {
 
               <button
                 type="submit"
-                className="btn btn-primary btn-full-width"
+                className="admin-register-button"
               >
+                <svg className="button-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                </svg>
                 Verify Passcode
               </button>
             </form>
 
-            <div className="text-center mt-20">
-              <p>
-                <Link to="/admin/login">Back to Admin Login</Link>
-              </p>
+            <div className="admin-register-footer">
+              <Link to="/admin/login" className="back-to-admin-login-link">
+                <svg className="link-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 3H19C20.1 3 21 3.9 21 5V19C21 20.1 20.1 21 19 21H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <polyline points="10,17 15,12 10,7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <line x1="15" y1="12" x2="3" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Back to Admin Login
+              </Link>
             </div>
           </div>
         </div>
@@ -133,96 +156,165 @@ const AdminRegister = () => {
   }
 
   return (
-    <div className="container">
-      <div className="flex-center" className="admin-register-container">
-        <div className="card" className="card admin-register-card">
-          <h2 className="text-center mb-20">Register New Admin</h2>
+    <div className="admin-register-page">
+      <div className="admin-register-container">
+        <div className="admin-register-card">
+          <div className="admin-register-header">
+            <h1 className="admin-register-title">Register New Admin</h1>
+            <p className="admin-register-subtitle">Create a new administrator account</p>
+          </div>
 
           {error && (
-            <div
-              className={`alert ${
-                error.includes('successfully') ? 'alert-success' : 'alert-error'
-              }`}
-            >
+            <div className={`admin-register-error ${error.includes('successfully') ? 'success' : ''}`}>
+              <svg className="error-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {error.includes('successfully') ? (
+                  <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                ) : (
+                  <>
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                    <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" strokeWidth="2"/>
+                    <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" strokeWidth="2"/>
+                  </>
+                )}
+              </svg>
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="form-label">Username</label>
-              <input
-                type="text"
-                name="username"
-                className="form-input"
-                value={formData.username}
-                onChange={handleChange}
-                required
-                placeholder="Enter admin username"
-              />
+          <form onSubmit={handleSubmit} className="admin-register-form">
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">
+                  <svg className="label-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
+                  </svg>
+                  Username
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  className="form-input"
+                  value={formData.username}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter admin username"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  <svg className="label-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  className="form-input"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter admin email"
+                />
+              </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Email</label>
-              <input
-                type="email"
-                name="email"
-                className="form-input"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                placeholder="Enter admin email"
-              />
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">
+                  <svg className="label-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
+                    <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                    <path d="M7 11V7A5 5 0 0 1 17 7V11" stroke="currentColor" strokeWidth="2"/>
+                  </svg>
+                  Password
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  className="form-input"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter password"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  <svg className="label-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
+                    <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                    <path d="M7 11V7A5 5 0 0 1 17 7V11" stroke="currentColor" strokeWidth="2"/>
+                  </svg>
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  className="form-input"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  placeholder="Confirm password"
+                />
+              </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input
-                type="password"
-                name="password"
-                className="form-input"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                placeholder="Enter password"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Confirm Password</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                className="form-input"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                placeholder="Confirm password"
-              />
-            </div>
-
-            <div className="flex gap-10">
+            <div className="form-actions">
               <button
                 type="button"
-                className="btn btn-secondary btn-flex"
+                className="admin-register-button secondary"
                 onClick={() => setStep(1)}
               >
+                <svg className="button-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19 12H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
                 Back
               </button>
               <button
                 type="submit"
-                className="btn btn-primary btn-flex"
+                className="admin-register-button"
                 disabled={loading}
               >
-                {loading ? 'Registering...' : 'Register Admin'}
+                {loading ? (
+                  <>
+                    <svg className="loading-spinner" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeDasharray="31.416" strokeDashoffset="31.416">
+                        <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
+                        <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
+                      </circle>
+                    </svg>
+                    Registering...
+                  </>
+                ) : (
+                  <>
+                    <svg className="button-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M16 21V19C16 17.9391 15.5786 16.9217 14.8284 16.1716C14.0783 15.4214 13.0609 15 12 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <circle cx="8.5" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
+                      <line x1="20" y1="8" x2="20" y2="14" stroke="currentColor" strokeWidth="2"/>
+                      <line x1="17" y1="11" x2="23" y2="11" stroke="currentColor" strokeWidth="2"/>
+                    </svg>
+                    Register Admin
+                  </>
+                )}
               </button>
             </div>
           </form>
 
-          <div className="text-center mt-20">
-            <p>
-              <Link to="/admin/login">Back to Admin Login</Link>
-            </p>
+          <div className="admin-register-footer">
+            <Link to="/admin/login" className="back-to-admin-login-link">
+              <svg className="link-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 3H19C20.1 3 21 3.9 21 5V19C21 20.1 20.1 21 19 21H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="10,17 15,12 10,7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="15" y1="12" x2="3" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Back to Admin Login
+            </Link>
           </div>
         </div>
       </div>

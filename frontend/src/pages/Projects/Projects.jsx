@@ -142,7 +142,7 @@ const Projects = () => {
                   <strong>Required Skills:</strong>
                   <div className="flex flex-wrap gap-10 mt-5">
                     {project.requiredSkills.map((skill, index) => (
-                      <span key={index} className="status-badge status-open">
+                      <span key={index} className="skill-badge">
                         {skill}
                       </span>
                     ))}

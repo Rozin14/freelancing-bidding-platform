@@ -164,7 +164,7 @@ const AdminPanel = () => {
                     <strong>Skills:</strong>
                     <div className="flex flex-wrap gap-10 mt-5">
                       {user.profile.skills.map((skill, index) => (
-                        <span key={index} className="status-badge status-open">
+                        <span key={index} className="skill-badge">
                           {skill}
                         </span>
                       ))}
@@ -249,7 +249,7 @@ const AdminPanel = () => {
                     <strong>Skills:</strong>
                     <div className="flex flex-wrap gap-10 mt-5">
                       {project.requiredSkills.map((skill, index) => (
-                        <span key={index} className="status-badge status-open">
+                        <span key={index} className="skill-badge">
                           {skill}
                         </span>
                       ))}

@@ -609,7 +609,7 @@ const ProjectDetail = () => {
               <h3>Required Skills</h3>
               <div className="flex flex-wrap gap-10">
                 {project.requiredSkills.map((skill, index) => (
-                  <span key={index} className="status-badge status-open">
+                  <span key={index} className="skill-badge">
                     {skill}
                   </span>
                 ))}
