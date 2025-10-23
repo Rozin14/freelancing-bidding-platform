@@ -563,11 +563,7 @@ const ProjectDetail = () => {
                 <strong>Client:</strong>
                 <Link
                   to={`/profile/${project.clientId._id}`}
-                  style={{
-                    marginLeft: '5px',
-                    color: '#007bff',
-                    textDecoration: 'none',
-                  }}
+                  className="project-link client-link-margin"
                 >
                   {project.clientId.username}
                 </Link>
@@ -575,11 +571,7 @@ const ProjectDetail = () => {
                   user.role === 'client' &&
                   project.clientId._id === user.id && (
                     <span
-                      style={{
-                        marginLeft: '5px',
-                        color: '#28a745',
-                        fontWeight: 'bold',
-                      }}
+                      className="you-indicator"
                     >
                       (You)
                     </span>
@@ -621,24 +613,8 @@ const ProjectDetail = () => {
           {project?.clientId &&
             typeof project.clientId === 'object' &&
             project.clientId.isActive === false && (
-              <div
-                style={{
-                  padding: '15px',
-                  backgroundColor: '#fff3cd',
-                  border: '1px solid #ffc107',
-                  borderRadius: '8px',
-                  marginBottom: '20px',
-                  textAlign: 'center',
-                }}
-              >
-                <p
-                  style={{
-                    margin: 0,
-                    color: '#856404',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                  }}
-                >
+              <div className="warning-message">
+                <p className="warning-text">
                   ⚠️ The client who posted this project has been suspended by
                   administration
                 </p>
@@ -651,11 +627,7 @@ const ProjectDetail = () => {
               <p>
                 <Link
                   to={`/profile/${project.freelancerId._id}`}
-                  style={{
-                    color: '#007bff',
-                    textDecoration: 'none',
-                    fontWeight: 'bold',
-                  }}
+                  className="project-link"
                 >
                   {project.freelancerId.username}
                 </Link>
@@ -663,11 +635,7 @@ const ProjectDetail = () => {
                   user.role === 'freelancer' &&
                   project.freelancerId._id === user.id && (
                     <span
-                      style={{
-                        color: '#6c757d',
-                        fontWeight: 'normal',
-                        marginLeft: '8px',
-                      }}
+                      className="freelancer-you-indicator"
                     >
                       (You)
                     </span>
@@ -723,13 +691,8 @@ const ProjectDetail = () => {
                 project.status === 'completed' && (
                   <div className="mt-20">
                     <button
-                      className="btn btn-warning"
+                      className="btn btn-warning btn-unmark-completed"
                       onClick={handleUnmarkCompleted}
-                      style={{
-                        backgroundColor: '#ffc107',
-                        borderColor: '#ffc107',
-                        color: '#212529',
-                      }}
                     >
                       Unmark as Completed
                     </button>
@@ -903,54 +866,17 @@ const ProjectDetail = () => {
             user.role === 'client' &&
             project.clientId._id === user.id &&
             project.status === 'cancelled' && (
-              <div
-                style={{
-                  marginTop: '20px',
-                  padding: '15px',
-                  border: '1px solid #28a745',
-                  borderRadius: '8px',
-                  backgroundColor: '#f8fff8',
-                  textAlign: 'center',
-                }}
-              >
-                <h4
-                  style={{
-                    color: '#28a745',
-                    marginBottom: '10px',
-                    fontSize: '16px',
-                  }}
-                >
+              <div className="reopen-section">
+                <h4 className="reopen-title">
                   🔄 Re-open Project
                 </h4>
-                <p
-                  style={{
-                    color: '#666',
-                    marginBottom: '15px',
-                    fontSize: '14px',
-                  }}
-                >
+                <p className="reopen-description">
                   This project is currently cancelled. You can reopen it to make
                   it available for freelancers to bid on again.
                 </p>
                 <button
                   onClick={handleReopenProject}
-                  style={{
-                    backgroundColor: '#28a745',
-                    color: 'white',
-                    border: 'none',
-                    padding: '10px 20px',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.3s',
-                  }}
-                  onMouseEnter={e => {
-                    e.target.style.backgroundColor = '#218838';
-                  }}
-                  onMouseLeave={e => {
-                    e.target.style.backgroundColor = '#28a745';
-                  }}
+                  className="btn-reopen"
                 >
                   Re-open Project
                 </button>
@@ -964,11 +890,7 @@ const ProjectDetail = () => {
             project.status !== 'closed' &&
             project.status !== 'cancelled' && (
               <hr
-                style={{
-                  margin: '20px 0',
-                  border: 'none',
-                  borderTop: '1px solid #e9ecef',
-                }}
+                className="separator-line"
               />
             )}
 
@@ -979,31 +901,18 @@ const ProjectDetail = () => {
             project.status !== 'closed' &&
             project.status !== 'cancelled' && (
               <div
-                style={{
-                  marginTop: '20px',
-                  textAlign: 'center',
-                }}
+                className="cancel-section"
               >
-                <h4 style={{ color: '#dc3545', marginBottom: '15px' }}>
+                <h4 className="cancel-title">
                   ⚠️ Cancel Project
                 </h4>
-                <p style={{ color: '#666', marginBottom: '20px' }}>
+                <p className="cancel-description">
                   If a freelancer is working on this project, they will be
                   notified.
                 </p>
                 <button
                   onClick={handleCancelProject}
-                  style={{
-                    backgroundColor: '#dc3545',
-                    color: 'white',
-                    border: 'none',
-                    padding: '12px 24px',
-                    borderRadius: '6px',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.3s',
-                  }}
+                  className="btn-cancel-project"
                   onMouseEnter={e => {
                     e.target.style.backgroundColor = '#c82333';
                   }}

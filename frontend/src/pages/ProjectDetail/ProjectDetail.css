@@ -72,3 +72,224 @@
   background-color: #007bff;
   color: white;
 }
+
+/* New styles for moved inline styles */
+.project-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.project-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+  border-color: #5a6268;
+}
+
+.project-section {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.bid-card {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 15px;
+  background-color: white;
+  transition: all 0.3s ease;
+}
+
+.bid-card:hover {
+  background-color: #f8f9fa;
+  border-color: #007bff;
+}
+
+.proposal-text {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.warning-message {
+  padding: 15px;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.warning-text {
+  margin: 0;
+  color: #856404;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.reopen-section {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #28a745;
+  border-radius: 8px;
+  background-color: #f8fff8;
+  text-align: center;
+}
+
+.reopen-title {
+  color: #28a745;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.reopen-description {
+  color: #666;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.btn-reopen {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-reopen:hover {
+  background-color: #218838;
+}
+
+/* Additional styles for remaining inline styles */
+.client-link-margin {
+  margin-left: 5px;
+}
+
+.you-indicator {
+  margin-left: 5px;
+  color: #28a745;
+  font-weight: bold;
+}
+
+.freelancer-you-indicator {
+  color: #6c757d;
+  font-weight: normal;
+  margin-left: 8px;
+}
+
+.btn-unmark-completed {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #212529;
+}
+
+.separator-line {
+  margin: 20px 0;
+  border: none;
+  border-top: 1px solid #dee2e6;
+}
+
+.cancel-section {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.cancel-title {
+  color: #dc3545;
+  margin-bottom: 15px;
+}
+
+.cancel-description {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.btn-cancel-project {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-cancel-project:hover {
+  background-color: #c82333;
+}
+
+.bid-card-detail {
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  background-color: white;
+  transition: all 0.3s ease;
+}
+
+.bid-card-detail:hover {
+  background-color: #f8f9fa;
+  border-color: #007bff;
+}
+
+.freelancer-link-detail {
+  color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.freelancer-link-detail:hover {
+  color: #0056b3;
+}
+
+.proposal-text-detail {
+  margin: 5px 0;
+  color: #666;
+  line-height: 1.6;
+}
+
+.bid-meta-detail {
+  font-size: 14px;
+  color: #888;
+}

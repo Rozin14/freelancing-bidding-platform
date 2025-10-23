@@ -329,26 +329,12 @@ const BidDetail = () => {
           {isProjectOwner && bid.status === 'accepted' && !existingEscrow && (
             <div className="bid-actions">
               <button
-                className="btn btn-primary btn-large"
+                className="btn btn-primary btn-large btn-fund-escrow"
                 onClick={handleFundEscrow}
-                style={{
-                  backgroundColor: '#17a2b8',
-                  borderColor: '#17a2b8',
-                  fontSize: '16px',
-                  padding: '12px 24px'
-                }}
               >
                 💰 Send Funds to Escrow
               </button>
-              <div style={{
-                marginTop: '10px',
-                padding: '10px',
-                backgroundColor: '#e3f2fd',
-                border: '1px solid #2196f3',
-                borderRadius: '6px',
-                fontSize: '14px',
-                color: '#1976d2'
-              }}>
+              <div className="escrow-info">
                 💡 <strong>Escrow Protection:</strong> Secure your payment until work is completed and approved.
               </div>
             </div>

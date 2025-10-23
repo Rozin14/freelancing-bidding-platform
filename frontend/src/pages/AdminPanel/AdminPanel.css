@@ -2,6 +2,19 @@
   padding: 15px;
   border: 1px solid #eee;
   border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 250px;
+}
+
+.user-card .flex-between {
+  margin-top: auto;
+}
+
+.grid.grid-2 {
+  gap: 20px;
+  align-items: start;
 }
 
 .user-info, .project-info {
@@ -17,4 +30,10 @@
   margin-left: 5px;
   color: #007bff;
   text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.client-link:hover, .freelancer-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
 }

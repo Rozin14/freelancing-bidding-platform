@@ -185,3 +185,227 @@
   font-size: 14px;
   color: #155724;
 }
+
+/* New styles for moved inline styles */
+.btn-accept {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-accept:hover {
+  background-color: #218838;
+}
+
+.btn-reject {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-reject:hover {
+  background-color: #c82333;
+}
+
+.escrow-status {
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  text-align: center;
+  margin: 10px 0;
+}
+
+.escrow-pending {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+}
+
+.escrow-funded {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.work-approved-message {
+  background-color: #d1ecf1;
+  border: 1px solid #bee5eb;
+  color: #0c5460;
+  padding: 15px;
+  border-radius: 6px;
+  margin: 15px 0;
+  text-align: center;
+  font-weight: bold;
+}
+
+.pending-payment-message {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+  padding: 15px;
+  border-radius: 6px;
+  margin: 15px 0;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Additional styles for remaining inline styles */
+.btn-fund-escrow {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-fund-escrow:hover {
+  background-color: #138496;
+}
+
+.escrow-info {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #e3f2fd;
+  border: 1px solid #2196f3;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #0d47a1;
+}
+
+.escrow-status-container {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.escrow-status-title {
+  margin: 0 0 10px 0;
+  color: #495057;
+}
+
+.escrow-status-text {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.escrow-status-badge {
+  color: #ffc107;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.escrow-status-badge.pending {
+  color: #ffc107;
+}
+
+.escrow-status-badge.in_progress {
+  color: #17a2b8;
+}
+
+.escrow-status-badge.ready_for_release {
+  color: #28a745;
+}
+
+.escrow-status-badge.released {
+  color: #6c757d;
+}
+
+.escrow-status-badge.cancelled {
+  color: #dc3545;
+}
+
+.btn-approve-work {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-approve-work:hover {
+  background-color: #218838;
+}
+
+.work-approved-notification {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #155724;
+}
+
+.btn-settle-payment {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-settle-payment:hover {
+  background-color: #218838;
+}
+
+.pending-payment-container {
+  padding: 12px 24px;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  margin: 15px 0;
+  text-align: center;
+}
+
+.pending-payment-title {
+  color: #856404;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.pending-payment-description {
+  color: #856404;
+  margin-bottom: 15px;
+}
+
+.btn-accept-payment {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-accept-payment:hover {
+  background-color: #218838;
+}

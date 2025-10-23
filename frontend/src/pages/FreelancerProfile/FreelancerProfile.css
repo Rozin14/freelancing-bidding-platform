@@ -274,3 +274,15 @@
   font-weight: 500;
   margin-top: 10px;
 }
+
+.client-link {
+  margin-left: 5px;
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.client-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}

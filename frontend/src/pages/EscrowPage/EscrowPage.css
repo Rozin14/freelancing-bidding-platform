@@ -395,3 +395,9 @@
     box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
   }
 }
+
+/* Additional styles for remaining inline styles */
+.status-badge-dynamic {
+  /* This class will be used for dynamic status badge styling */
+  /* The actual styles are applied via the getStatusBadgeStyle function */
+}

@@ -114,9 +114,9 @@ const Dashboard = () => {
                            project.status.replace('_', ' ')}
                         </span>
                       </div>
-                      <p style={{ margin: '5px 0', color: '#666' }}>{project.description.substring(0, 100)}...</p>
-                      <div className="flex-between" style={{ alignItems: 'center' }}>
-                        <p style={{ margin: '0', fontSize: '14px', color: '#888' }}>
+                      <p className="project-description">{project.description.substring(0, 100)}...</p>
+                      <div className="flex-between-center">
+                        <p className="review-date">
                           Budget: ₹{project.budget} | Posted: {new Date(project.createdAt).toLocaleDateString()}
                         </p>
                         {/* Delete button - only for open and cancelled projects */}
@@ -127,16 +127,8 @@ const Dashboard = () => {
                               e.stopPropagation();
                               handleDeleteProject(project._id);
                             }}
-                            style={{
-                              backgroundColor: '#dc3545',
-                              color: 'white',
-                              border: 'none',
-                              padding: '4px 8px',
-                              borderRadius: '4px',
-                              fontSize: '12px',
-                              cursor: 'pointer',
-                              marginLeft: '10px'
-                            }}
+                            className="btn-delete-project"
+                            style={{ marginLeft: '10px' }}
                             title="Delete Project"
                           >
                             🗑️ Delete
@@ -161,13 +153,7 @@ const Dashboard = () => {
                   {dashboardData.bids.slice(0, 5).map(bid => (
                     <div 
                       key={bid._id} 
-                      className="mb-20 bid-card-clickable" 
-                      style={{ 
-                        padding: '10px', 
-                        border: '1px solid #eee', 
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                      }}
+                      className="mb-20 bid-card-clickable bid-card-container"
                       onClick={() => navigate(`/projects/${bid.projectId}/bids/${bid._id}`)}
                     >
                       <div className="flex-between">
@@ -175,7 +161,6 @@ const Dashboard = () => {
                           <Link
                             to={`/profile/${bid.freelancerId?._id}`}
                             className="freelancer-link"
-                            style={{ color: '#007bff', textDecoration: 'none', fontWeight: 'bold' }}
                           >
                             {bid.freelancerId?.username}
                           </Link>
@@ -184,13 +169,13 @@ const Dashboard = () => {
                           {bid.status === 'accepted' ? 'Assigned' : bid.status}
                         </span>
                       </div>
-                      <p style={{ margin: '5px 0', color: '#666' }}>
+                      <p className="project-description">
                         {bid.proposal.substring(0, 100)}...
                       </p>
-                      <p style={{ margin: '0', fontSize: '14px', color: '#888' }}>
+                      <p className="review-date">
                         Amount: ₹{bid.amount} | Timeline: {bid.timeline} | Bid Date: {new Date(bid.createdAt).toLocaleDateString()} {new Date(bid.createdAt).toLocaleTimeString()}
                       </p>
-                      <div className="bid-actions" style={{ marginTop: '10px' }}>
+                      <div className="bid-actions bid-actions-container">
                         <button
                           className="btn btn-secondary btn-sm"
                           onClick={(e) => {
@@ -248,8 +233,8 @@ const Dashboard = () => {
                           {bid.status === 'accepted' ? 'Assigned' : bid.status}
                         </span>
                       </div>
-                      <p style={{ margin: '5px 0', color: '#666' }}>{bid.proposal.substring(0, 100)}...</p>
-                      <p style={{ margin: '0', fontSize: '14px', color: '#888' }}>
+                      <p className="project-description">{bid.proposal.substring(0, 100)}...</p>
+                      <p className="review-date">
                         Amount: ₹{bid.amount} | Timeline: {bid.timeline} | Bid Date: {new Date(bid.createdAt).toLocaleDateString()} {new Date(bid.createdAt).toLocaleTimeString()}
                       </p>
                     </div>
@@ -276,12 +261,12 @@ const Dashboard = () => {
                            project.status.replace('_', ' ')}
                         </span>
                       </div>
-                      <p style={{ margin: '5px 0', color: '#666' }}>{project.description.substring(0, 100)}...</p>
-                      <p style={{ margin: '0', fontSize: '14px', color: '#888' }}>
+                      <p className="project-description">{project.description.substring(0, 100)}...</p>
+                      <p className="review-date">
                         Client: 
                         <Link 
                           to={`/profile/${project.clientId?._id}`}
-                          style={{ marginLeft: '5px', color: '#007bff', textDecoration: 'none' }}
+                          className="freelancer-link"
                         >
                           {project.clientId?.username}
                         </Link>
@@ -304,14 +289,14 @@ const Dashboard = () => {
                   <div className="flex-between">
                     <Link
                       to={`/profile/${review.clientId?._id}`}
-                      style={{ color: '#007bff', textDecoration: 'none', fontWeight: 'bold' }}
+                      className="freelancer-link"
                     >
                       {review.clientId?.username}
                     </Link>
                     <span>⭐ {review.rating}/5</span>
                   </div>
-                  <p style={{ margin: '5px 0', color: '#666' }}>{review.comment}</p>
-                  <p style={{ margin: '0', fontSize: '14px', color: '#888' }}>
+                  <p className="project-description">{review.comment}</p>
+                  <p className="review-date">
                     {new Date(review.createdAt).toLocaleDateString()}
                   </p>
                 </div>

@@ -309,7 +309,7 @@ const EscrowPage = () => {
                         )}
                       </div>
                       <span
-                        className={getStatusBadgeClass(escrow.status)}
+                        className={`${getStatusBadgeClass(escrow.status)} status-badge-dynamic`}
                         style={getStatusBadgeStyle(escrow.status)}
                       >
                         {escrow.status.replace('_', ' ')}

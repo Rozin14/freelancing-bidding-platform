@@ -459,11 +459,7 @@ const FreelancerProfile = () => {
                   <div className="reviewer-info">
                     <Link
                       to={`/profile/${review.clientId?._id}`}
-                      style={{
-                        color: '#007bff',
-                        textDecoration: 'none',
-                        fontWeight: 'bold',
-                      }}
+                      className="client-link"
                     >
                       {review.clientId?.username || 'Anonymous'}
                     </Link>

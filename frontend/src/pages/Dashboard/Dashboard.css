@@ -129,3 +129,97 @@
   padding: 6px 12px;
   font-size: 0.875em;
 }
+
+/* New styles for moved inline styles */
+.project-description {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.btn-delete {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-delete:hover {
+  background-color: #c82333;
+}
+
+.bid-card {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 15px;
+  background-color: white;
+  transition: all 0.3s ease;
+}
+
+.bid-card:hover {
+  background-color: #f8f9fa;
+  border-color: #007bff;
+}
+
+.freelancer-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.freelancer-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.review-date {
+  color: #888;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Additional styles for remaining inline styles */
+.flex-between-center {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-delete-project {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-delete-project:hover {
+  background-color: #c82333;
+}
+
+.bid-card-container {
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  background-color: white;
+  transition: all 0.3s ease;
+}
+
+.bid-card-container:hover {
+  background-color: #f8f9fa;
+  border-color: #007bff;
+}
+
+.bid-actions-container {
+  margin-top: 10px;
+}

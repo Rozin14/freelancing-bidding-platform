@@ -833,16 +833,7 @@ const MessagingSystem = () => {
               </div>
 
               {/* Messages Display */}
-              <div
-                style={{
-                  height: '300px',
-                  overflowY: 'auto',
-                  border: '1px solid #eee',
-                  padding: '10px',
-                  marginBottom: '10px',
-                  backgroundColor: '#fff',
-                }}
-              >
+              <div className="admin-messages-container">
                 {(() => {
                   // Get all messages for this project
                   const storedMessages = localStorage.getItem('messages');
@@ -883,27 +874,14 @@ const MessagingSystem = () => {
                   return projectMessages.map(msg => (
                     <div
                       key={msg.id}
-                      style={{
-                        marginBottom: '10px',
-                        textAlign: msg.from === user.id ? 'right' : 'left',
-                      }}
+                      className={`message-item ${msg.from === user.id ? 'message-right' : 'message-left'}`}
                     >
                       {msg.from !== user.id && (
                         <div className="message-sender-name">
                           {msg.fromUsername || 'User'}
                         </div>
                       )}
-                      <div
-                        style={{
-                          display: 'inline-block',
-                          padding: '8px 12px',
-                          borderRadius: '8px',
-                          backgroundColor:
-                            msg.from === user.id ? '#007bff' : '#f8f9fa',
-                          color: msg.from === user.id ? 'white' : 'black',
-                          maxWidth: '70%',
-                        }}
-                      >
+                      <div className={`message-bubble ${msg.from === user.id ? 'message-own' : 'message-other'}`}>
                         <div>{msg.content}</div>
                         <div className="message-timestamp">
                           {new Date(msg.timestamp).toLocaleString()}
@@ -1045,17 +1023,7 @@ const MessagingSystem = () => {
                         return (
                           <div
                             key={project._id}
-                            className={`mb-10 p-10 ${
-                              isSelected ? 'bg-light' : ''
-                            }`}
-                            style={{
-                              padding: '15px',
-                              border: '1px solid #eee',
-                              borderRadius: '8px',
-                              cursor: 'pointer',
-                              backgroundColor: isSelected ? '#f8f9fa' : 'white',
-                              position: 'relative',
-                            }}
+                            className={`conversation-item ${isSelected ? 'conversation-selected' : ''}`}
                             onClick={() => setSelectedUser(clientId)}
                           >
                             <div className="conversation-item-content">
@@ -1086,20 +1054,7 @@ const MessagingSystem = () => {
                         return (
                           <div
                             key={partnerId}
-                            className={`mb-10 p-10 ${
-                              selectedUser === partnerId ? 'bg-light' : ''
-                            }`}
-                            style={{
-                              padding: '15px',
-                              border: '1px solid #eee',
-                              borderRadius: '8px',
-                              cursor: 'pointer',
-                              backgroundColor:
-                                selectedUser === partnerId
-                                  ? '#f8f9fa'
-                                  : 'white',
-                              position: 'relative',
-                            }}
+                            className={`conversation-item ${selectedUser === partnerId ? 'conversation-selected' : ''}`}
                             onClick={() => setSelectedUser(partnerId)}
                           >
                             <div className="conversation-item-content">
@@ -1108,23 +1063,12 @@ const MessagingSystem = () => {
                                 <div className="conversation-item-project">
                                   <strong>Project:</strong>
                                   <span
-                                    style={{
-                                      color: '#007bff',
-                                      cursor: 'pointer',
-                                      textDecoration: 'underline',
-                                      marginLeft: '5px',
-                                    }}
+                                    className="project-link-clickable"
                                     onClick={e => {
                                       e.stopPropagation(); // Prevent conversation selection
                                       if (project?._id) {
                                         navigate(`/projects/${project._id}`);
                                       }
-                                    }}
-                                    onMouseEnter={e => {
-                                      e.target.style.color = '#0056b3';
-                                    }}
-                                    onMouseLeave={e => {
-                                      e.target.style.color = '#007bff';
                                     }}
                                   >
                                     {project?.title}
@@ -1136,22 +1080,7 @@ const MessagingSystem = () => {
                                 </div>
                               </div>
                               {unreadCount > 0 && (
-                                <div
-                                  style={{
-                                    backgroundColor: '#dc3545',
-                                    color: 'white',
-                                    borderRadius: '50%',
-                                    width: '24px',
-                                    height: '24px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '12px',
-                                    fontWeight: 'bold',
-                                    flexShrink: 0,
-                                    marginLeft: '10px',
-                                  }}
-                                >
+                                <div className="unread-count-badge">
                                   {unreadCount}
                                 </div>
                               )}
@@ -1175,15 +1104,7 @@ const MessagingSystem = () => {
                   {(() => {
                     const project = getProjectForConversation(selectedUser);
                     return (
-                      <div
-                        style={{
-                          padding: '10px',
-                          backgroundColor: '#f8f9fa',
-                          borderRadius: '4px',
-                          marginBottom: '10px',
-                          fontSize: '14px',
-                        }}
-                      >
+                      <div className="project-info-container">
                         <strong>Project:</strong> {project?.title}
                         <br />
                         <strong>Budget:</strong> ₹{project?.budget}
@@ -1270,16 +1191,7 @@ const MessagingSystem = () => {
                                         onClick={() =>
                                           handleRedirectToBidDetails(item)
                                         }
-                                        style={{
-                                          backgroundColor: '#007bff',
-                                          color: 'white',
-                                          border: 'none',
-                                          padding: '6px 12px',
-                                          borderRadius: '15px',
-                                          fontSize: '12px',
-                                          fontWeight: 'bold',
-                                          cursor: 'pointer',
-                                        }}
+                                        className="btn-notification-action"
                                       >
                                         {item.actionText}
                                       </button>
@@ -1289,16 +1201,7 @@ const MessagingSystem = () => {
                                   {!item.isRead && (
                                     <button
                                       onClick={() => handleMarkAsRead(item.id)}
-                                      style={{
-                                        backgroundColor: '#6c757d',
-                                        color: 'white',
-                                        border: 'none',
-                                        padding: '6px 12px',
-                                        borderRadius: '15px',
-                                        fontSize: '12px',
-                                        fontWeight: 'bold',
-                                        cursor: 'pointer',
-                                      }}
+                                      className="btn-mark-read"
                                     >
                                       Mark as Read
                                     </button>
@@ -1320,39 +1223,13 @@ const MessagingSystem = () => {
                             >
                               {/* Sender name above message - only for other person's messages */}
                               {item.from !== user.id && (
-                                <div
-                                  style={{
-                                    fontSize: '12px',
-                                    color: '#666',
-                                    marginBottom: '2px',
-                                    fontWeight: '500',
-                                  }}
-                                >
+                              <div className="message-sender-info">
                                   {getPartnerUsername(item.from)}
                                 </div>
                               )}
 
                               <div>
-                                <div
-                                  style={{
-                                    display: 'inline-block',
-                                    padding: '8px 12px',
-                                    borderRadius: '8px',
-                                    backgroundColor:
-                                      item.from === user.id
-                                        ? '#007bff'
-                                        : item.isAdminMessage
-                                        ? '#ffcdd2'
-                                        : '#f8f9fa',
-                                    color:
-                                      item.from === user.id
-                                        ? 'white'
-                                        : item.isAdminMessage
-                                        ? '#c62828'
-                                        : 'black',
-                                    maxWidth: '70%',
-                                  }}
-                                >
+                                <div className={`message-bubble ${item.from === user.id ? 'message-own' : item.isAdminMessage ? 'message-admin' : 'message-other'}`}>
                                   <div>{item.content}</div>
                                   <div className="notification-dispute-text">
                                     {new Date(item.timestamp).toLocaleString()}
@@ -1366,7 +1243,7 @@ const MessagingSystem = () => {
                                     !item.isReadByClient) ||
                                     (user.role === 'freelancer' &&
                                       !item.isReadByFreelancer)) && (
-                                    <div style={{ marginTop: '5px' }}>
+                                    <div className="admin-message-actions">
                                       <button
                                         onClick={() => {
                                           const storedMessages =
@@ -1442,27 +1319,7 @@ const MessagingSystem = () => {
                   <div className="dispute-form-section">
                     <button
                       onClick={handleRaiseDispute}
-                      className="btn btn-danger"
-                      style={{
-                        padding: '12px 20px',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        fontWeight: 'bold',
-                        boxShadow: '0 4px 12px rgba(220, 53, 69, 0.3)',
-                        border: 'none',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                      }}
-                      onMouseEnter={e => {
-                        e.target.style.transform = 'translateY(-2px)';
-                        e.target.style.boxShadow =
-                          '0 6px 16px rgba(220, 53, 69, 0.4)';
-                      }}
-                      onMouseLeave={e => {
-                        e.target.style.transform = 'translateY(0)';
-                        e.target.style.boxShadow =
-                          '0 4px 12px rgba(220, 53, 69, 0.3)';
-                      }}
+                      className="btn-raise-dispute"
                     >
                       🚨 Raise Dispute
                     </button>
