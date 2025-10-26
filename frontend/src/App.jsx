@@ -17,26 +17,26 @@ import MessagingSystem from './components/MessagingSystem/MessagingSystem';
 import EscrowPage from './pages/EscrowPage/EscrowPage';
 import './App.css';
 
+// Component to protect routes that need authentication
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
   
-  console.log('ProtectedRoute - user:', user, 'allowedRoles:', allowedRoles);
-  
+  // Show loading while checking if user is logged in
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
   
+  // If no user is logged in, send them to login page
   if (!user) {
-    console.log('ProtectedRoute - No user, redirecting to /login');
     return <Navigate to="/login" />;
   }
   
+  // Check if user has the right role for this page
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    console.log('ProtectedRoute - User role not allowed, redirecting to /dashboard');
     return <Navigate to="/dashboard" />;
   }
   
-  console.log('ProtectedRoute - Access granted');
+  // User is logged in and has permission, show the page
   return children;
 }
 

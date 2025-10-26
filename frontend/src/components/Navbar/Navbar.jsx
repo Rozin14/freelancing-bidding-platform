@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getEscrowNotificationsCount } from '../../utils/escrowManager';
 import './Navbar.css';
@@ -7,88 +7,97 @@ import './Navbar.css';
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [notificationCount, setNotificationCount] = useState(0);
-  const [escrowNotificationCount, setEscrowNotificationCount] = useState(0);
+  const location = useLocation();
+  
+  // State for notification counts
+  const [messageCount, setMessageCount] = useState(0);
+  const [escrowCount, setEscrowCount] = useState(0);
 
+  // Function to check if a link is active
+  const isActive = (path) => {
+    if (path === '/dashboard' && location.pathname === '/') {
+      return true; // Home page is considered dashboard
+    }
+    if (path === '/profile' && location.pathname.startsWith('/profile/')) {
+      return true; // Any profile page
+    }
+    return location.pathname === path || location.pathname.startsWith(path + '/');
+  };
+
+  // Update notification counts when user changes
   useEffect(() => {
-    const loadNotificationCount = () => {
+    const updateNotificationCounts = () => {
       if (user && user.role !== 'admin') {
-        let count = 0;
+        let totalCount = 0;
         
-        // Count unread platform notifications
-        const storedNotifications = localStorage.getItem('platformNotifications');
-        if (storedNotifications) {
-          const notifications = JSON.parse(storedNotifications);
-          const userNotifications = notifications.filter(notification => 
+        // Count platform notifications for this user
+        const savedNotifications = localStorage.getItem('platformNotifications');
+        if (savedNotifications) {
+          const allNotifications = JSON.parse(savedNotifications);
+          const userNotifications = allNotifications.filter(notification => 
             (notification.to === user.id || notification.toUserId === user.id) && !notification.isRead
           );
-          count += userNotifications.length;
+          totalCount += userNotifications.length;
         }
         
-        // Count unread admin messages
-        const storedMessages = localStorage.getItem('messages');
-        if (storedMessages) {
-          const messages = JSON.parse(storedMessages);
-          const unreadAdminMessages = messages.filter(msg => {
-            // Check if it's an admin message
+        // Count admin messages for this user
+        const savedMessages = localStorage.getItem('messages');
+        if (savedMessages) {
+          const allMessages = JSON.parse(savedMessages);
+          const unreadAdminMessages = allMessages.filter(msg => {
             if (!msg.isAdminMessage) return false;
             
-            // For clients, check messages where client is involved
             if (user.role === 'client') {
-              // Check if user is the clientId in the message
-              const isInvolved = msg.clientId === user.id || msg.to === user.id || msg.from === user.id;
-              return isInvolved && !msg.isReadByClient;
-            } 
-            // For freelancers, check messages where freelancer is involved
-            else if (user.role === 'freelancer') {
-              // Check if user is the freelancerId in the message
-              const isInvolved = msg.freelancerId === user.id || msg.to === user.id || msg.from === user.id;
-              return isInvolved && !msg.isReadByFreelancer;
+              const isUserInvolved = msg.clientId === user.id || msg.to === user.id || msg.from === user.id;
+              return isUserInvolved && !msg.isReadByClient;
+            } else if (user.role === 'freelancer') {
+              const isUserInvolved = msg.freelancerId === user.id || msg.to === user.id || msg.from === user.id;
+              return isUserInvolved && !msg.isReadByFreelancer;
             }
             return false;
           });
-          console.log('Navbar - Unread admin messages:', unreadAdminMessages);
-          count += unreadAdminMessages.length;
+          totalCount += unreadAdminMessages.length;
         }
         
-        setNotificationCount(count);
+        setMessageCount(totalCount);
       } else if (user && user.role === 'admin') {
-        // For admins, count unread disputes
-        const storedDisputes = localStorage.getItem('disputes');
-        if (storedDisputes) {
-          const disputes = JSON.parse(storedDisputes);
-          const unreadDisputes = disputes.filter(dispute => !dispute.isReadByAdmin);
-          setNotificationCount(unreadDisputes.length);
+        // Count disputes for admin
+        const savedDisputes = localStorage.getItem('disputes');
+        if (savedDisputes) {
+          const allDisputes = JSON.parse(savedDisputes);
+          const unreadDisputes = allDisputes.filter(dispute => !dispute.isReadByAdmin);
+          setMessageCount(unreadDisputes.length);
         } else {
-          setNotificationCount(0);
+          setMessageCount(0);
         }
         
         // Count escrow notifications for admin
-        setEscrowNotificationCount(getEscrowNotificationsCount());
+        setEscrowCount(getEscrowNotificationsCount());
       } else {
-        setNotificationCount(0);
-        setEscrowNotificationCount(0);
+        setMessageCount(0);
+        setEscrowCount(0);
       }
     };
 
-    loadNotificationCount();
+    updateNotificationCounts();
     
-    // Listen for storage changes to update notification count
+    // Listen for changes in storage to update counts
     const handleStorageChange = () => {
-      loadNotificationCount();
+      updateNotificationCounts();
     };
     
     window.addEventListener('storage', handleStorageChange);
     
-    // Also check periodically for changes (in case of same-tab updates)
-    const interval = setInterval(loadNotificationCount, 1000);
+    // Check for updates every second
+    const timer = setInterval(updateNotificationCounts, 1000);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
+      clearInterval(timer);
     };
   }, [user]);
 
+  // Handle user logout
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -115,7 +124,7 @@ const Navbar = () => {
               <>
                 <div className="nav-links">
                   {user.role !== 'admin' && (
-                    <Link to="/dashboard" className="nav-link">
+                    <Link to="/dashboard" className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}>
                       <svg className="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -126,7 +135,7 @@ const Navbar = () => {
                     </Link>
                   )}
                   {user.role === 'admin' && (
-                    <Link to="/admin" className="nav-link admin-link">
+                    <Link to="/admin" className={`nav-link admin-link ${isActive('/admin') ? 'active' : ''}`}>
                       <svg className="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -135,40 +144,40 @@ const Navbar = () => {
                       Admin Panel
                     </Link>
                   )}
-                  <Link to="/projects" className="nav-link">
+                  <Link to="/projects" className={`nav-link ${isActive('/projects') ? 'active' : ''}`}>
                     <svg className="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       <polyline points="14,2 14,8 20,8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                     Projects
                   </Link>
-                  <Link to="/messages" className="nav-link messages-link">
+                  <Link to="/messages" className={`nav-link messages-link ${isActive('/messages') ? 'active' : ''}`}>
                     <svg className="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                     Messages
-                    {notificationCount > 0 && (
+                    {messageCount > 0 && (
                       <span className="notification-badge">
-                        {notificationCount > 99 ? '99+' : notificationCount}
+                        {messageCount > 99 ? '99+' : messageCount}
                       </span>
                     )}
                   </Link>
                   {user.role === 'admin' && (
-                    <Link to="/escrow" className="nav-link escrow-link">
+                    <Link to="/escrow" className={`nav-link escrow-link ${isActive('/escrow') ? 'active' : ''}`}>
                       <svg className="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 1V23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6312 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 11.6312 16.9749 10.9749C17.6312 10.3185 18 9.42826 18 8.5C18 7.57174 17.6312 6.6815 16.9749 6.02513C16.3185 5.36875 15.4283 5 14.5 5H17Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                       Escrow
-                      {escrowNotificationCount > 0 && (
+                      {escrowCount > 0 && (
                         <span className="notification-badge">
-                          {escrowNotificationCount > 99 ? '99+' : escrowNotificationCount}
+                          {escrowCount > 99 ? '99+' : escrowCount}
                         </span>
                       )}
                     </Link>
                   )}
                   {user.role === 'client' && (
-                    <Link to="/create-project" className="nav-link primary-link">
+                    <Link to="/create-project" className={`nav-link primary-link ${isActive('/create-project') ? 'active' : ''}`}>
                       <svg className="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -181,10 +190,18 @@ const Navbar = () => {
                 <div className="user-section">
                   <div className="user-info">
                     <div className="user-avatar">
-                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
-                      </svg>
+                      {user.image && !user.image.includes('/img/no-image.png') ? (
+                        <img 
+                          src={user.image} 
+                          alt={`${user.username}'s profile`}
+                          className="user-profile-image"
+                        />
+                      ) : (
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
+                        </svg>
+                      )}
                     </div>
                     <div className="user-details">
                       <Link 

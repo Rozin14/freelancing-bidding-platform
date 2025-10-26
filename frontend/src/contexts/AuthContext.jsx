@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/axiosConfig';
 
+// Create a context for sharing user data across the app
 const AuthContext = createContext();
 
+// Hook to use the auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -11,69 +13,107 @@ export const useAuth = () => {
   return context;
 };
 
+// Provider component that manages user authentication
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // State for current user and loading status
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Check if user is logged in when app starts
   useEffect(() => {
-    const token = sessionStorage.getItem('token');
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // Verify token and get user info
+    const savedToken = sessionStorage.getItem('token');
+    if (savedToken) {
+      // Set up axios to use the token for all requests
+      api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
+      // Get user info from the token
       fetchUserProfile();
     } else {
-      setLoading(false);
+      setIsLoading(false);
     }
   }, []);
 
+  // Get user information from the saved token
   const fetchUserProfile = async () => {
     try {
-      // Get user info from token since dashboard doesn't return user data
-      const token = sessionStorage.getItem('token');
-      if (token) {
-        // Decode token to get user info
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const userInfo = { 
-          id: payload.id, 
-          role: payload.role, 
-          username: payload.username || (payload.role === 'admin' ? 'admin' : 'user')
-        };
-        setUser(userInfo);
+      const savedToken = sessionStorage.getItem('token');
+      if (savedToken) {
+        // Decode the token to get user information
+        const tokenParts = savedToken.split('.');
+        const userData = JSON.parse(atob(tokenParts[1]));
+        
+        // Fetch complete user profile from server
+        try {
+          const response = await api.get(`/api/auth/profile/${userData.id}`);
+          // Ensure the user object has both _id and id for consistency
+          const userProfile = {
+            ...response.data,
+            id: response.data._id || response.data.id
+          };
+          setCurrentUser(userProfile);
+        } catch (profileError) {
+          // If profile fetch fails, fall back to basic info from token
+          const userInfo = { 
+            id: userData.id, 
+            role: userData.role, 
+            username: userData.username || (userData.role === 'admin' ? 'admin' : 'user')
+          };
+          setCurrentUser(userInfo);
+        }
       }
     } catch (error) {
+      // If token is invalid, clear it and log out user
       sessionStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
+      delete api.defaults.headers.common['Authorization'];
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
+  // Function to log in a user
   const login = async (email, password, isAdmin = false) => {
     try {
-      const endpoint = isAdmin ? '/api/admin/login' : '/api/auth/login';
-      const response = await axios.post(endpoint, { email, password });
+      // Choose the right login endpoint
+      const loginUrl = isAdmin ? '/api/admin/login' : '/api/auth/login';
+      const response = await api.post(loginUrl, { email, password });
       
       const { token, user: userData } = response.data;
-      sessionStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
-      // For admin login, create user object from token since backend doesn't return user data
+      // Save the token and set it for future requests
+      sessionStorage.setItem('token', token);
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      // Handle admin login differently
       if (isAdmin && !userData) {
         try {
-          const payload = JSON.parse(atob(token.split('.')[1]));
+          // Get admin info from the token
+          const tokenParts = token.split('.');
+          const adminData = JSON.parse(atob(tokenParts[1]));
           const adminUser = {
-            id: payload.id,
-            role: payload.role || 'admin',
-            username: payload.username || 'admin'
+            id: adminData.id,
+            role: adminData.role || 'admin',
+            username: adminData.username || 'admin'
           };
-          console.log('Admin login successful:', adminUser);
-          setUser(adminUser);
+          setCurrentUser(adminUser);
         } catch (tokenError) {
-          console.error('Error decoding admin token:', tokenError);
-          setUser({ id: 'admin', role: 'admin', username: 'admin' });
+          // If token decoding fails, create a basic admin user
+          setCurrentUser({ id: 'admin', role: 'admin', username: 'admin' });
         }
       } else {
-        setUser(userData);
+        // For regular users, fetch complete profile to ensure we have all fields including image
+        try {
+          const tokenParts = token.split('.');
+          const tokenData = JSON.parse(atob(tokenParts[1]));
+          const profileResponse = await api.get(`/api/auth/profile/${tokenData.id}`);
+          // Ensure the user object has both _id and id for consistency
+          const userProfile = {
+            ...profileResponse.data,
+            id: profileResponse.data._id || profileResponse.data.id
+          };
+          setCurrentUser(userProfile);
+        } catch (profileError) {
+          // If profile fetch fails, use the user data from login response
+          setCurrentUser(userData);
+        }
       }
       
       return { success: true };
@@ -85,15 +125,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Function to register a new user
   const register = async (userData) => {
     try {
-      const response = await axios.post('/api/auth/register', userData);
+      const response = await api.post('/api/auth/register', userData);
       
       const { token, user: newUser } = response.data;
-      sessionStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
-      setUser(newUser);
+      // Save the token and set it for future requests
+      sessionStorage.setItem('token', token);
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      setCurrentUser(newUser);
       return { success: true };
     } catch (error) {
       return { 
@@ -103,15 +146,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Function to log out the user
   const logout = () => {
+    // Clear the saved token
     sessionStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
-    setUser(null);
+    delete api.defaults.headers.common['Authorization'];
+    setCurrentUser(null);
   };
 
+  // All the functions and data we want to share
   const value = {
-    user,
-    loading,
+    user: currentUser,
+    loading: isLoading,
     login,
     register,
     logout,

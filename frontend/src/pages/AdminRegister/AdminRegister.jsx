@@ -1,109 +1,110 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/axiosConfig';
 import './AdminRegister.css';
 
 const AdminRegister = () => {
-  const [step, setStep] = useState(1); // 1: passcode verification, 2: registration form
-  const [passcode, setPasscode] = useState('');
-  const [formData, setFormData] = useState({
+  // State for admin registration process
+  const [currentStep, setCurrentStep] = useState(1); // 1: adminPasscode verification, 2: registration form
+  const [adminPasscode, setAdminPasscode] = useState('');
+  const [adminForm, setAdminForm] = useState({
     username: '',
     email: '',
     password: '',
     confirmPassword: '',
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  // Admin registration passcode (you can make this configurable via environment variables)
+  // Admin registration adminPasscode (you can make this configurable via environment variables)
   const ADMIN_PASSCODE = 'ADMIN2025';
 
   const handlePasscodeChange = e => {
-    setPasscode(e.target.value);
-    setError('');
+    setAdminPasscode(e.target.value);
+    setErrorMessage('');
   };
 
   const verifyPasscode = e => {
     e.preventDefault();
-    if (passcode === ADMIN_PASSCODE) {
-      setStep(2);
-      setError('');
+    if (adminPasscode === ADMIN_PASSCODE) {
+      setCurrentStep(2);
+      setErrorMessage('');
     } else {
-      setError('Invalid passcode. Access denied.');
+      setErrorMessage('Invalid adminPasscode. Access denied.');
     }
   };
 
   const handleChange = e => {
-    setFormData({
-      ...formData,
+    setAdminForm({
+      ...adminForm,
       [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
-    setError('');
+    setErrorMessage('');
 
     // Validation
-    if (!formData.username.trim()) {
-      setError('Username is required');
+    if (!adminForm.username.trim()) {
+      setErrorMessage('Username is required');
       return;
     }
 
-    if (!formData.email.trim()) {
-      setError('Email is required');
+    if (!adminForm.email.trim()) {
+      setErrorMessage('Email is required');
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+    if (adminForm.password !== adminForm.confirmPassword) {
+      setErrorMessage('Passwords do not match');
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (adminForm.password.length < 6) {
+      setErrorMessage('Password must be at least 6 characters');
       return;
     }
 
-    setLoading(true);
+    setIsLoading(true);
 
     try {
-      const response = await axios.post('/api/admin/register', formData);
+      const response = await api.post('/api/admin/register', adminForm);
 
       if (response.data.message) {
-        setError('Admin registered successfully! You can now login.');
+        setErrorMessage('Admin registered successfully! You can now login.');
         // Optionally redirect to admin login
         setTimeout(() => {
           navigate('/admin/login');
         }, 2000);
       }
     } catch (error) {
-      setError(error.response?.data?.message || 'Error registering admin');
+      setErrorMessage(error.response?.data?.message || 'Error registering admin');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  if (step === 1) {
+  if (currentStep === 1) {
     return (
       <div className="admin-register-page">
         <div className="admin-register-container">
           <div className="admin-register-card">
             <div className="admin-register-header">
               <h1 className="admin-register-title">Admin Registration</h1>
-              <p className="admin-register-subtitle">Enter the admin passcode to proceed with registration</p>
+              <p className="admin-register-subtitle">Enter the admin adminPasscode to proceed with registration</p>
             </div>
 
-            {error && (
-              <div className="admin-register-error">
-                <svg className="error-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {errorMessage && (
+            <div className="admin-register-error">
+              <svg className="error-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
                   <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" strokeWidth="2"/>
                   <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" strokeWidth="2"/>
                 </svg>
-                {error}
+                {errorMessage}
               </div>
             )}
 
@@ -120,9 +121,9 @@ const AdminRegister = () => {
                 <input
                   type="password"
                   className="form-input"
-                  value={passcode}
+                  value={adminPasscode}
                   onChange={handlePasscodeChange}
-                  placeholder="Enter admin passcode"
+                  placeholder="Enter admin adminPasscode"
                   required
                 />
               </div>
@@ -164,10 +165,10 @@ const AdminRegister = () => {
             <p className="admin-register-subtitle">Create a new administrator account</p>
           </div>
 
-          {error && (
-            <div className={`admin-register-error ${error.includes('successfully') ? 'success' : ''}`}>
+          {errorMessage && (
+            <div className={`admin-register-error ${errorMessage.includes('successfully') ? 'success' : ''}`}>
               <svg className="error-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {error.includes('successfully') ? (
+                {errorMessage.includes('successfully') ? (
                   <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 ) : (
                   <>
@@ -177,7 +178,7 @@ const AdminRegister = () => {
                   </>
                 )}
               </svg>
-              {error}
+              {errorMessage}
             </div>
           )}
 
@@ -195,7 +196,7 @@ const AdminRegister = () => {
                   type="text"
                   name="username"
                   className="form-input"
-                  value={formData.username}
+                  value={adminForm.username}
                   onChange={handleChange}
                   required
                   placeholder="Enter admin username"
@@ -214,7 +215,7 @@ const AdminRegister = () => {
                   type="email"
                   name="email"
                   className="form-input"
-                  value={formData.email}
+                  value={adminForm.email}
                   onChange={handleChange}
                   required
                   placeholder="Enter admin email"
@@ -236,7 +237,7 @@ const AdminRegister = () => {
                   type="password"
                   name="password"
                   className="form-input"
-                  value={formData.password}
+                  value={adminForm.password}
                   onChange={handleChange}
                   required
                   placeholder="Enter password"
@@ -256,7 +257,7 @@ const AdminRegister = () => {
                   type="password"
                   name="confirmPassword"
                   className="form-input"
-                  value={formData.confirmPassword}
+                  value={adminForm.confirmPassword}
                   onChange={handleChange}
                   required
                   placeholder="Confirm password"
@@ -268,7 +269,7 @@ const AdminRegister = () => {
               <button
                 type="button"
                 className="admin-register-button secondary"
-                onClick={() => setStep(1)}
+                onClick={() => setCurrentStep(1)}
               >
                 <svg className="button-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M19 12H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -279,9 +280,9 @@ const AdminRegister = () => {
               <button
                 type="submit"
                 className="admin-register-button"
-                disabled={loading}
+                disabled={isLoading}
               >
-                {loading ? (
+                {isLoading ? (
                   <>
                     <svg className="loading-spinner" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeDasharray="31.416" strokeDashoffset="31.416">

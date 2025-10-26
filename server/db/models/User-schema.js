@@ -5,6 +5,10 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['client', 'freelancer'], required: true },
+  image: {
+    type: String,
+    default: `http://localhost:${process.env.PORT || 5000}/img/no-image.png`,
+  },
   profile: {
     name: String,
     company: String, // for clients

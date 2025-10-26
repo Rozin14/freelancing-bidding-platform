@@ -4,39 +4,40 @@ import { useAuth } from '../../contexts/AuthContext';
 import './AdminLogin.css';
 
 const AdminLogin = () => {
-  const [formData, setFormData] = useState({
+  // State for admin login form
+  const [adminInput, setAdminInput] = useState({
     email: '',
     password: ''
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setAdminInput({
+      ...adminInput,
       [e.target.name]: e.target.value
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
+    setErrorMessage('');
+    setIsLoading(true);
 
-    const result = await login(formData.email, formData.password, true);
+    const result = await login(adminInput.email, adminInput.password, true);
     
     if (result.success) {
       console.log('Admin login successful, navigating to /admin');
       navigate('/admin');
     } else {
       console.log('Admin login failed:', result.message);
-      setError(result.message);
+      setErrorMessage(result.message);
     }
     
-    setLoading(false);
+    setIsLoading(false);
   };
 
   return (
@@ -56,14 +57,14 @@ const AdminLogin = () => {
             <p className="admin-login-subtitle">Secure administrative login portal</p>
           </div>
           
-          {error && (
+          {errorMessage && (
             <div className="admin-login-error">
               <svg className="error-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
                 <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" strokeWidth="2"/>
                 <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" strokeWidth="2"/>
               </svg>
-              {error}
+              {errorMessage}
             </div>
           )}
 
@@ -80,7 +81,7 @@ const AdminLogin = () => {
                 type="email"
                 name="email"
                 className="form-input"
-                value={formData.email}
+                value={adminInput.email}
                 onChange={handleChange}
                 placeholder="Enter admin email"
                 required
@@ -100,7 +101,7 @@ const AdminLogin = () => {
                 type="password"
                 name="password"
                 className="form-input"
-                value={formData.password}
+                value={adminInput.password}
                 onChange={handleChange}
                 placeholder="Enter admin password"
                 required
@@ -110,9 +111,9 @@ const AdminLogin = () => {
             <button
               type="submit"
               className="admin-login-button"
-              disabled={loading}
+              disabled={isLoading}
             >
-              {loading ? (
+              {isLoading ? (
                 <>
                   <svg className="loading-spinner" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeDasharray="31.416" strokeDashoffset="31.416">

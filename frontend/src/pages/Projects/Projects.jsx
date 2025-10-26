@@ -1,53 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import axios from 'axios';
+import api from '../../utils/axiosConfig';
 import './Projects.css';
 
 const Projects = () => {
   const { user } = useAuth();
+  
+  // State for projects and filters
   const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
+  const [isLoading, setIsLoading] = useState(true);
+  const [filterOptions, setFilterOptions] = useState({
     status: '',
     skills: '',
     search: ''
   });
 
+  // Load projects when component mounts
   useEffect(() => {
-    fetchProjects();
+    loadProjects();
   }, []);
 
-  const fetchProjects = async () => {
+  // Get projects from the server
+  const loadProjects = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       const params = new URLSearchParams();
-      if (filters.status) params.append('status', filters.status);
-      if (filters.skills) params.append('skills', filters.skills);
-      if (filters.search) params.append('search', filters.search);
+      if (filterOptions.status) params.append('status', filterOptions.status);
+      if (filterOptions.skills) params.append('skills', filterOptions.skills);
+      if (filterOptions.search) params.append('search', filterOptions.search);
 
-      const response = await axios.get(`/api/projects?${params.toString()}`);
+      const response = await api.get(`/api/projects?${params.toString()}`);
       setProjects(response.data);
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const handleFilterChange = (e) => {
-    setFilters({
-      ...filters,
+    setFilterOptions({
+      ...filterOptions,
       [e.target.name]: e.target.value
     });
   };
 
   const handleSearch = () => {
-    fetchProjects();
+    loadProjects();
   };
 
-  if (loading) {
-    return <div className="loading">Loading projects...</div>;
+  if (isLoading) {
+    return <div className="isLoading">Loading projects...</div>;
   }
 
   return (
@@ -67,7 +71,7 @@ const Projects = () => {
             <select
               name="status"
               className="form-select"
-              value={filters.status}
+              value={filterOptions.status}
               onChange={handleFilterChange}
             >
               <option value="">All Status</option>
@@ -85,7 +89,7 @@ const Projects = () => {
               type="text"
               name="skills"
               className="form-input"
-              value={filters.skills}
+              value={filterOptions.skills}
               onChange={handleFilterChange}
               placeholder="e.g., React, Node.js, Python"
             />
@@ -97,7 +101,7 @@ const Projects = () => {
               type="text"
               name="search"
               className="form-input"
-              value={filters.search}
+              value={filterOptions.search}
               onChange={handleFilterChange}
               placeholder="Search projects..."
             />

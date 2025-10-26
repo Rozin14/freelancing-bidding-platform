@@ -1,32 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import axios from 'axios';
+import api from '../../utils/axiosConfig';
+import Register from '../Register/Register';
 import './FreelancerProfile.css';
 
 const FreelancerProfile = () => {
   const { freelancerId, userId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  
+  // State for freelancer information
   const [freelancer, setFreelancer] = useState(null);
   const [projects, setProjects] = useState([]);
   const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
   const [showReviewForm, setShowReviewForm] = useState(false);
-  const [reviewForm, setReviewForm] = useState({
+  const [reviewInput, setReviewInput] = useState({
     rating: 5,
     comment: '',
   });
-  const [submittingReview, setSubmittingReview] = useState(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [canReview, setCanReview] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
 
   // Determine the actual user ID to fetch
-  const targetUserId = userId || freelancerId;
+  const targetUserId = userId || freelancerId || user?.id || user?._id;
 
   useEffect(() => {
-    fetchFreelancerDetails();
-  }, [targetUserId]);
+    if (targetUserId) {
+      fetchFreelancerDetails();
+    } else {
+      console.error('No user ID found in URL parameters or user context');
+      setErrorMessage('Invalid profile URL - no user ID specified');
+      setIsLoading(false);
+    }
+  }, [targetUserId, user]);
 
   useEffect(() => {
     if (user && user.role === 'client' && freelancer?.role === 'freelancer') {
@@ -36,18 +46,18 @@ const FreelancerProfile = () => {
 
   const fetchFreelancerDetails = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
 
       // Check if this is an admin profile by trying admin endpoint first
       let userResponse;
       try {
-        userResponse = await axios.get(`/api/admin/profile/${targetUserId}`);
+        userResponse = await api.get(`/api/admin/profile/${targetUserId}`);
         // If successful, this is an admin
         setFreelancer({ ...userResponse.data, role: 'admin' });
       } catch (adminError) {
         // If admin endpoint fails, try regular user endpoint
         try {
-          userResponse = await axios.get(`/api/auth/profile/${targetUserId}`);
+          userResponse = await api.get(`/api/auth/profile/${targetUserId}`);
           setFreelancer(userResponse.data);
         } catch (userError) {
           throw new Error('Profile not found');
@@ -61,13 +71,13 @@ const FreelancerProfile = () => {
           setProjects([]);
         } else if (userResponse.data.role === 'freelancer') {
           // For freelancers, fetch their assigned projects
-          const projectsResponse = await axios.get(
+          const projectsResponse = await api.get(
             `/api/projects/freelancer/${targetUserId}`
           );
           setProjects(projectsResponse.data);
         } else {
           // For clients, fetch their created projects
-          const projectsResponse = await axios.get(
+          const projectsResponse = await api.get(
             `/api/projects/client/${targetUserId}`
           );
           setProjects(projectsResponse.data);
@@ -80,7 +90,7 @@ const FreelancerProfile = () => {
       // Fetch user's reviews (only for freelancers)
       try {
         if (userResponse.data.role === 'freelancer') {
-          const reviewsResponse = await axios.get(
+          const reviewsResponse = await api.get(
             `/api/reviews/freelancer/${targetUserId}`
           );
           setReviews(reviewsResponse.data);
@@ -93,79 +103,94 @@ const FreelancerProfile = () => {
         setReviews([]);
       }
     } catch (error) {
-      console.error('Error fetching freelancer details:', error);
-      setError('Error loading freelancer profile');
+      setErrorMessage(`Error loading freelancer profile: ${error.response?.data?.message || error.message}`);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const handleReviewSubmit = async e => {
     e.preventDefault();
 
-    if (!reviewForm.comment.trim()) {
+    if (!reviewInput.comment.trim()) {
       alert('Please enter a comment');
       return;
     }
 
-    setSubmittingReview(true);
+    setIsSubmittingReview(true);
 
     try {
-      await axios.post('/api/reviews', {
+      await api.post('/api/reviews', {
         freelancerId: targetUserId,
-        rating: reviewForm.rating,
-        comment: reviewForm.comment,
+        rating: reviewInput.rating,
+        comment: reviewInput.comment,
       });
 
       // Reset form and refresh data
-      setReviewForm({ rating: 5, comment: '' });
+      setReviewInput({ rating: 5, comment: '' });
       setShowReviewForm(false);
       fetchFreelancerDetails(); // Refresh to get updated reviews and rating
       alert('Review submitted successfully!');
-    } catch (error) {
-      console.error('Error submitting review:', error);
+    } catch (errorMessage) {
+      console.errorMessage('Error submitting review:', errorMessage);
       alert(
-        error.response?.data?.message ||
+        errorMessage.response?.data?.message ||
           'Error submitting review. Please try again.'
       );
     } finally {
-      setSubmittingReview(false);
+      setIsSubmittingReview(false);
     }
   };
 
   const handleReviewFormChange = e => {
-    setReviewForm({
-      ...reviewForm,
+    setReviewInput({
+      ...reviewInput,
       [e.target.name]: e.target.value,
     });
   };
 
   const checkCanReview = async () => {
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `/api/projects/client/${user.id}/freelancer/${targetUserId}/completed`
       );
       setCanReview(response.data.hasCompletedProjects);
-    } catch (error) {
-      console.error('Error checking review eligibility:', error);
+    } catch (errorMessage) {
+      console.errorMessage('Error checking review eligibility:', errorMessage);
       setCanReview(false);
     }
   };
 
-  if (loading) {
-    return <div className="loading">Loading freelancer profile...</div>;
+  const handleProfileUpdate = (updatedUser) => {
+    setFreelancer(updatedUser);
+    setShowEditProfile(false);
+  };
+
+  if (isLoading) {
+    return <div className="isLoading">Loading freelancer profile...</div>;
   }
 
-  if (error || !freelancer) {
+  if (errorMessage || !freelancer) {
     return (
       <div className="container">
-        <div className="alert alert-error">
-          {error || 'Freelancer not found'}
+        <div className="alert alert-errorMessage">
+          {errorMessage || 'Freelancer not found'}
         </div>
         <Link to="/projects" className="btn btn-secondary">
           Back to Projects
         </Link>
       </div>
+    );
+  }
+
+  // Show edit profile form when in edit mode
+  if (showEditProfile) {
+    return (
+      <Register 
+        id={targetUserId}
+        onUpdate={handleProfileUpdate}
+        onClose={() => setShowEditProfile(false)}
+      />
     );
   }
 
@@ -177,22 +202,41 @@ const FreelancerProfile = () => {
             ← Back to Projects
           </Link>
         </div>
-        <h1>
-          {freelancer?.role === 'admin'
-            ? 'Admin Profile'
-            : freelancer?.role === 'client'
-            ? 'Client Profile'
-            : 'Freelancer Profile'}
-        </h1>
+        <div className="flex gap-10 align-center">
+          <h1>
+            {freelancer?.role === 'admin'
+              ? 'Admin Profile'
+              : freelancer?.role === 'client'
+              ? 'Client Profile'
+              : 'Freelancer Profile'}
+          </h1>
+          {/* Show edit button only if user is viewing their own profile */}
+          {user && (user.id === targetUserId || user._id === targetUserId) && (
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowEditProfile(true)}
+            >
+              ✏️ Edit Profile
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-3 gap-20">
         {/* Profile Header */}
         <div className="card profile-header">
           <div className="freelancer-avatar-large">
-            <span className="avatar-placeholder-large">
-              {freelancer.username.charAt(0).toUpperCase()}
-            </span>
+            {freelancer.image && !freelancer.image.includes('/img/no-image.png') ? (
+              <img 
+                src={freelancer.image} 
+                alt={`${freelancer.username}'s profile`}
+                className="profile-image-large"
+              />
+            ) : (
+              <span className="avatar-placeholder-large">
+                {freelancer.username.charAt(0).toUpperCase()}
+              </span>
+            )}
           </div>
 
           <div className="profile-info">
@@ -324,7 +368,7 @@ const FreelancerProfile = () => {
                     <label className="form-label">Rating</label>
                     <select
                       name="rating"
-                      value={reviewForm.rating}
+                      value={reviewInput.rating}
                       onChange={handleReviewFormChange}
                       className="form-select"
                       required
@@ -341,7 +385,7 @@ const FreelancerProfile = () => {
                     <label className="form-label">Comment</label>
                     <textarea
                       name="comment"
-                      value={reviewForm.comment}
+                      value={reviewInput.comment}
                       onChange={handleReviewFormChange}
                       className="form-textarea"
                       placeholder="Write your review here..."
@@ -354,16 +398,16 @@ const FreelancerProfile = () => {
                     <button
                       type="submit"
                       className="btn btn-primary"
-                      disabled={submittingReview}
+                      disabled={isSubmittingReview}
                     >
-                      {submittingReview ? 'Submitting...' : 'Submit Review'}
+                      {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
                     </button>
                     <button
                       type="button"
-                      className="btn btn-secondary"
+                      className="btn btn-danger"
                       onClick={() => {
                         setShowReviewForm(false);
-                        setReviewForm({ rating: 5, comment: '' });
+                        setReviewInput({ rating: 5, comment: '' });
                       }}
                     >
                       Cancel

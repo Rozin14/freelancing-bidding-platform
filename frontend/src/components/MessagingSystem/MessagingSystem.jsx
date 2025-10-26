@@ -2,39 +2,56 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import './MessagingSystem.css';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/axiosConfig';
 
 const MessagingSystem = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  
+  // State for messages
   const [messages, setMessages] = useState([]);
+  const [currentMessage, setCurrentMessage] = useState('');
+  const [currentUser, setCurrentUser] = useState('');
+  const [conversations, setConversations] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [acceptedProjects, setAcceptedProjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // State for disputes
+  const [showDisputeForm, setShowDisputeForm] = useState(false);
+  const [disputeText, setDisputeText] = useState('');
+  const [disputeList, setDisputeList] = useState([]);
+  const [currentDispute, setCurrentDispute] = useState(null);
+  const [disputeDescription, setDisputeDescription] = useState('');
+  const [selectedDispute, setSelectedDispute] = useState(null);
+  
+  // State for messaging
   const [newMessage, setNewMessage] = useState('');
   const [selectedUser, setSelectedUser] = useState('');
-  const [conversations, setConversations] = useState([]);
-  const [acceptedProjects, setAcceptedProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showDisputeForm, setShowDisputeForm] = useState(false);
-  const [disputeDescription, setDisputeDescription] = useState('');
-  const [disputes, setDisputes] = useState([]);
+  
+  // State for notifications
+  const [notifications, setNotifications] = useState([]);
   const [platformNotifications, setPlatformNotifications] = useState([]);
-  const [selectedDispute, setSelectedDispute] = useState(null);
 
+  // Load disputes from storage
   const loadDisputes = () => {
-    const storedDisputes = localStorage.getItem('disputes');
-    if (storedDisputes) {
-      setDisputes(JSON.parse(storedDisputes));
+    const savedDisputes = localStorage.getItem('disputes');
+    if (savedDisputes) {
+      setDisputeList(JSON.parse(savedDisputes));
     }
   };
 
+  // Load notifications for the current user
   const loadPlatformNotifications = () => {
-    const storedNotifications = localStorage.getItem('platformNotifications');
-    if (storedNotifications) {
-      const notifications = JSON.parse(storedNotifications);
-      // Filter notifications for current user (both read and unread for display)
-      const userNotifications = notifications.filter(
+    const savedNotifications = localStorage.getItem('platformNotifications');
+    if (savedNotifications) {
+      const allNotifications = JSON.parse(savedNotifications);
+      // Get notifications for this user
+      const userNotifications = allNotifications.filter(
         notification =>
           notification.to === user.id || notification.toUserId === user.id
       );
+      setNotifications(userNotifications);
       setPlatformNotifications(userNotifications);
     }
   };
@@ -71,18 +88,18 @@ const MessagingSystem = () => {
 
   const loadAcceptedProjects = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       let projects = [];
 
       if (!user || !user.id) {
         console.error('User not properly loaded:', user);
-        setLoading(false);
+        setIsLoading(false);
         return;
       }
 
       if (user.role === 'client') {
         // Get projects where this client has accepted bids
-        const response = await axios.get('/api/projects');
+        const response = await api.get('/api/projects');
 
         // Filter for projects with accepted bids (either in_progress or with accepted bids)
         projects = response.data.filter(project => {
@@ -108,7 +125,7 @@ const MessagingSystem = () => {
             // For each project, check if there are accepted bids
             for (const project of clientProjects) {
               try {
-                const bidsResponse = await axios.get(
+                const bidsResponse = await api.get(
                   `/api/bids/projects/${project._id}`
                 );
 
@@ -131,7 +148,7 @@ const MessagingSystem = () => {
         }
       } else if (user.role === 'freelancer') {
         // Get projects where this freelancer has accepted bids
-        const response = await axios.get('/api/projects');
+        const response = await api.get('/api/projects');
 
         // Filter for projects with accepted bids (either in_progress or with accepted bids)
         projects = response.data.filter(project => {
@@ -154,7 +171,7 @@ const MessagingSystem = () => {
             // For each project, check if this freelancer has an accepted bid
             for (const project of allProjects) {
               try {
-                const bidsResponse = await axios.get(
+                const bidsResponse = await api.get(
                   `/api/bids/projects/${project._id}`
                 );
 
@@ -185,7 +202,7 @@ const MessagingSystem = () => {
         if (storedDisputes) {
           const disputesList = JSON.parse(storedDisputes);
           console.log('Admin - Disputes list:', disputesList);
-          const response = await axios.get('/api/projects');
+          const response = await api.get('/api/projects');
           console.log('Admin - All projects:', response.data);
 
           // Get unique project IDs from disputes
@@ -206,7 +223,7 @@ const MessagingSystem = () => {
     } catch (error) {
       console.error('Error loading accepted projects:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -466,7 +483,7 @@ const MessagingSystem = () => {
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="container">
         <h1>Messages</h1>
@@ -505,15 +522,57 @@ const MessagingSystem = () => {
       isReadByAdmin: false,
     };
 
-    const updatedDisputes = [...disputes, dispute];
-    setDisputes(updatedDisputes);
+    const updatedDisputes = [...disputeList, dispute];
+    setDisputeList(updatedDisputes);
     localStorage.setItem('disputes', JSON.stringify(updatedDisputes));
+
+    // Create platform notifications for both parties about the dispute
+    const existingNotifications = JSON.parse(
+      localStorage.getItem('platformNotifications') || '[]'
+    );
+
+    // Notification for the dispute raiser (confirmation)
+    const notificationForRaiser = {
+      id: Date.now(),
+      type: 'dispute_raised',
+      content: `🚨 You have raised a dispute regarding project "${project.title}" against ${otherPartyUsername}. Admins will review your dispute shortly.`,
+      projectId: project._id,
+      toUserId: user.id,
+      timestamp: new Date().toISOString(),
+      isRead: false,
+    };
+
+    // Notification for the other party (alert about dispute)
+    const notificationForOtherParty = {
+      id: Date.now() + 1,
+      type: 'dispute_raised_against',
+      content: `🚨 A dispute has been raised against you regarding project "${project.title}" by ${user.username}. Please check the dispute details and respond appropriately.`,
+      projectId: project._id,
+      toUserId: otherPartyId,
+      timestamp: new Date().toISOString(),
+      isRead: false,
+    };
+
+    // Add both notifications to the existing notifications
+    const updatedNotifications = [
+      ...existingNotifications,
+      notificationForRaiser,
+      notificationForOtherParty,
+    ];
+
+    localStorage.setItem(
+      'platformNotifications',
+      JSON.stringify(updatedNotifications)
+    );
+
+    // Reload notifications to update the display
+    loadPlatformNotifications();
 
     // Reset form
     setDisputeDescription('');
     setShowDisputeForm(false);
 
-    alert('Dispute raised successfully! Admins will review it shortly.');
+    alert('Dispute raised successfully! Both parties have been notified and admins will review it shortly.');
   };
 
   const handleDisputeCancel = () => {
@@ -555,12 +614,12 @@ const MessagingSystem = () => {
 
   const handleMarkDisputeAsRead = disputeId => {
     // Mark the specific dispute as read by admin
-    const updatedDisputes = disputes.map(dispute =>
+    const updatedDisputes = disputeList.map(dispute =>
       dispute.id === disputeId ? { ...dispute, isReadByAdmin: true } : dispute
     );
 
     // Save updated disputes
-    setDisputes(updatedDisputes);
+    setDisputeList(updatedDisputes);
     localStorage.setItem('disputes', JSON.stringify(updatedDisputes));
   };
 
@@ -574,7 +633,7 @@ const MessagingSystem = () => {
     }
 
     // Update dispute status to closed
-    const updatedDisputes = disputes.map(d =>
+    const updatedDisputes = disputeList.map(d =>
       d.id === dispute.id
         ? {
             ...d,
@@ -585,7 +644,7 @@ const MessagingSystem = () => {
         : d
     );
 
-    setDisputes(updatedDisputes);
+    setDisputeList(updatedDisputes);
     localStorage.setItem('disputes', JSON.stringify(updatedDisputes));
 
     // Create platform notifications for both participants
@@ -638,7 +697,7 @@ const MessagingSystem = () => {
       )
     ) {
       try {
-        await axios.put(`/api/projects/${projectId}/accept-payment`);
+        await api.put(`/api/projects/${projectId}/accept-payment`);
 
         // Remove the notification from localStorage
         const existingNotifications = JSON.parse(
@@ -703,7 +762,7 @@ const MessagingSystem = () => {
             <div className="dispute-actions">
               <button
                 onClick={handleDisputeCancel}
-                className="btn btn-secondary"
+                className="btn btn-danger"
               >
                 Cancel
               </button>
@@ -723,9 +782,9 @@ const MessagingSystem = () => {
       {user.role === 'admin' ? (
         <div className="card">
           <h3>Disputes Management</h3>
-          {disputes.length > 0 ? (
+          {disputeList.length > 0 ? (
             <div>
-              {disputes.map(dispute => (
+              {disputeList.map(dispute => (
                 <div
                   key={dispute.id}
                   className={`dispute-card ${dispute.status}`}
@@ -973,19 +1032,11 @@ const MessagingSystem = () => {
                 <strong>Active Projects:</strong> {acceptedProjects.length}
               </p>
               <p>
-                <strong>Status:</strong> {loading ? 'Loading...' : 'Ready'}
+                <strong>Status:</strong> {isLoading ? 'Loading...' : 'Ready'}
               </p>
             </div>
 
-            <div className="card dispute-form-card">
-              <h4>How to enable messaging:</h4>
-              <ol className="platform-notifications-instructions">
-                <li>Create a project (if you're a client)</li>
-                <li>Place a bid on a project (if you're a freelancer)</li>
-                <li>Accept the bid (if you're the client)</li>
-                <li>Come back to messages - you'll see the conversation!</li>
-              </ol>
-            </div>
+            
           </div>
         </div>
       ) : (
@@ -1156,6 +1207,10 @@ const MessagingSystem = () => {
                                 className={`notification-content ${
                                   isFundRelease
                                     ? 'fund-release fund-release-notification'
+                                    : item.type === 'dispute_raised'
+                                    ? 'dispute-raised'
+                                    : item.type === 'dispute_raised_against'
+                                    ? 'dispute-raised-against'
                                     : ''
                                 }`}
                               >
@@ -1172,6 +1227,36 @@ const MessagingSystem = () => {
                                     </div>
                                     <div className="notification-footer">
                                       🏆 You've earned this success! 🏆
+                                    </div>
+                                  </>
+                                ) : item.type === 'dispute_raised' ? (
+                                  <>
+                                    <div className="notification-celebration">
+                                      ⚠️🚨⚠️
+                                    </div>
+                                    <div className="notification-title">
+                                      Dispute Raised
+                                    </div>
+                                    <div className="notification-text">
+                                      {item.content}
+                                    </div>
+                                    <div className="notification-footer">
+                                      📋 Admins will review your dispute
+                                    </div>
+                                  </>
+                                ) : item.type === 'dispute_raised_against' ? (
+                                  <>
+                                    <div className="notification-celebration">
+                                      🚨⚠️🚨
+                                    </div>
+                                    <div className="notification-title">
+                                      Dispute Alert!
+                                    </div>
+                                    <div className="notification-text">
+                                      {item.content}
+                                    </div>
+                                    <div className="notification-footer">
+                                      ⚡ Please respond to this dispute
                                     </div>
                                   </>
                                 ) : (

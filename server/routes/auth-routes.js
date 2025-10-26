@@ -9,7 +9,7 @@ const router = express.Router();
 // User Routes
 router.post('/register', async (req, res) => {
   try {
-    const { username, email, password, role, profile } = req.body;
+    const { username, email, password, role, profile, image } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
@@ -24,6 +24,7 @@ router.post('/register', async (req, res) => {
       password: hashedPassword,
       role,
       profile,
+      image: image || `http://localhost:${process.env.DEV_PORT}/img/no-image.png`,
     });
     await user.save();
 
@@ -181,6 +182,51 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
     res
       .status(500)
       .json({ message: 'Error fetching dashboard', error: error.message });
+  }
+});
+
+// Update user profile
+router.put('/profile', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { username, email, profile, image } = req.body;
+
+    // Check if username or email already exists for other users
+    const existingUser = await User.findOne({ 
+      _id: { $ne: userId },
+      $or: [{ email }, { username }] 
+    });
+    
+    if (existingUser) {
+      return res.status(400).json({ message: 'Username or email already exists' });
+    }
+
+    // Update user profile
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { 
+        username, 
+        email, 
+        profile, 
+        image: image || undefined 
+      },
+      { new: true, select: '-password' }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Profile updated successfully',
+      user: updatedUser 
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      message: 'Error updating profile', 
+      error: error.message 
+    });
   }
 });
 

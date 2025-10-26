@@ -1,30 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import axios from 'axios';
+import api from '../../utils/axiosConfig';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  
+  // State for dashboard information
+  const [userData, setUserData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Load dashboard data when user is available
   useEffect(() => {
-    // Only fetch dashboard data if user is available
     if (user) {
-      fetchDashboardData();
+      loadDashboardData();
     }
   }, [user]);
 
-  const fetchDashboardData = async () => {
+  // Get dashboard data from the server
+  const loadDashboardData = async () => {
     try {
-      const response = await axios.get('/api/auth/dashboard');
-      setDashboardData(response.data);
+      const response = await api.get('/api/auth/dashboard');
+      setUserData(response.data);
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      // Set empty dashboard data to prevent the error state
-      setDashboardData({
+      console.error('Error loading dashboard data:', error);
+      // Set empty data if there's an error
+      setUserData({
         projects: [],
         bids: [],
         reviews: [],
@@ -37,7 +40,7 @@ const Dashboard = () => {
         }
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -47,9 +50,9 @@ const Dashboard = () => {
     }
 
     try {
-      await axios.delete(`/api/projects/${projectId}`);
+      await api.delete(`/api/projects/${projectId}`);
       alert('Project deleted successfully!');
-      fetchDashboardData(); // Refresh dashboard data
+      loadDashboardData(); // Refresh dashboard data
     } catch (error) {
       console.error('Error deleting project:', error);
       const errorMessage = error.response?.data?.message || 'Error deleting project. Please try again.';
@@ -58,11 +61,11 @@ const Dashboard = () => {
   };
 
   // Show loading if user is not yet loaded or dashboard data is being fetched
-  if (!user || loading) {
+  if (!user || isLoading) {
     return <div className="loading">Loading dashboard...</div>;
   }
 
-  if (!dashboardData) {
+  if (!userData) {
     return <div className="container">Error loading dashboard data</div>;
   }
 
@@ -76,15 +79,15 @@ const Dashboard = () => {
         <div>
           <div className="grid grid-3 mb-20">
             <div className="card text-center">
-              <h3>{dashboardData.stats?.totalProjects || 0}</h3>
+              <h3>{userData.stats?.totalProjects || 0}</h3>
               <p>Total Projects</p>
             </div>
             <div className="card text-center">
-              <h3>{dashboardData.stats?.activeProjects || 0}</h3>
+              <h3>{userData.stats?.activeProjects || 0}</h3>
               <p>Active Projects</p>
             </div>
             <div className="card text-center">
-              <h3>{dashboardData.stats?.completedProjects || 0}</h3>
+              <h3>{userData.stats?.completedProjects || 0}</h3>
               <p>Completed Projects</p>
             </div>
           </div>
@@ -92,9 +95,9 @@ const Dashboard = () => {
           <div className="grid grid-2">
             <div className="card">
               <h3>My Projects</h3>
-              {dashboardData.projects?.length > 0 ? (
+              {userData.projects?.length > 0 ? (
                 <div>
-                  {dashboardData.projects.slice(0, 5).map(project => (
+                  {userData.projects.slice(0, 5).map(project => (
                     <div key={project._id} className="mb-20 project-card">
                       <div className="flex-between">
                         <div className="flex gap-10 align-center">
@@ -137,7 +140,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                   ))}
-                  {dashboardData.projects.length > 5 && (
+                  {userData.projects.length > 5 && (
                     <Link to="/projects" className="btn btn-secondary">View All Projects</Link>
                   )}
                 </div>
@@ -148,9 +151,9 @@ const Dashboard = () => {
 
             <div className="card">
               <h3>Recent Bids</h3>
-              {dashboardData.bids?.length > 0 ? (
+              {userData.bids?.length > 0 ? (
                 <div>
-                  {dashboardData.bids.slice(0, 5).map(bid => (
+                  {userData.bids.slice(0, 5).map(bid => (
                     <div 
                       key={bid._id} 
                       className="mb-20 bid-card-clickable bid-card-container"
@@ -201,19 +204,19 @@ const Dashboard = () => {
         <div>
           <div className="grid grid-4 mb-20">
             <div className="card text-center">
-              <h3>{dashboardData.stats?.totalBids || 0}</h3>
+              <h3>{userData.stats?.totalBids || 0}</h3>
               <p>Total Bids</p>
             </div>
             <div className="card text-center">
-              <h3>{dashboardData.stats?.acceptedBids || 0}</h3>
+              <h3>{userData.stats?.acceptedBids || 0}</h3>
               <p>Assigned Bids</p>
             </div>
             <div className="card text-center">
-              <h3>{dashboardData.stats?.activeProjects || 0}</h3>
+              <h3>{userData.stats?.activeProjects || 0}</h3>
               <p>Active Projects</p>
             </div>
             <div className="card text-center">
-              <h3>{dashboardData.stats?.projectsDone || 0}</h3>
+              <h3>{userData.stats?.projectsDone || 0}</h3>
               <p>Projects Done</p>
             </div>
           </div>
@@ -221,9 +224,9 @@ const Dashboard = () => {
           <div className="grid grid-2">
             <div className="card">
               <h3>My Bids</h3>
-              {dashboardData.bids?.length > 0 ? (
+              {userData.bids?.length > 0 ? (
                 <div>
-                  {dashboardData.bids.slice(0, 5).map(bid => (
+                  {userData.bids.slice(0, 5).map(bid => (
                     <div key={bid._id} className="mb-20 project-card">
                       <div className="flex-between">
                         <Link to={`/projects/${bid.projectId?._id}`} className="project-link">
@@ -247,9 +250,9 @@ const Dashboard = () => {
 
             <div className="card">
               <h3>My Projects</h3>
-              {dashboardData.projects?.length > 0 ? (
+              {userData.projects?.length > 0 ? (
                 <div>
-                  {dashboardData.projects.slice(0, 5).map(project => (
+                  {userData.projects.slice(0, 5).map(project => (
                     <div key={project._id} className="mb-20 project-card">
                       <div className="flex-between">
                         <Link to={`/projects/${project._id}`} className="project-link">
@@ -281,10 +284,10 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {dashboardData.reviews?.length > 0 && (
+          {userData.reviews?.length > 0 && (
             <div className="card">
               <h3>Recent Reviews</h3>
-              {dashboardData.reviews.slice(0, 3).map(review => (
+              {userData.reviews.slice(0, 3).map(review => (
                 <div key={review._id} className="mb-20 project-card">
                   <div className="flex-between">
                     <Link

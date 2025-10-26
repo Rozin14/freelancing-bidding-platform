@@ -53,6 +53,12 @@
   padding: 10px;
   border: 1px solid #eee;
   border-radius: 4px;
+  height: 150px !important;
+  max-height: 150px !important;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .project-link {
@@ -61,8 +67,15 @@
 }
 
 .project-description {
-  margin: 5px 0;
+  margin: 5px 0 0 0;
   color: #666;
+  font-size: 14px;
+  line-height: 1.2;
+  max-height: 50.4px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 .project-meta {
@@ -97,6 +110,11 @@
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s ease;
+  height: 200px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .bid-card-clickable:hover {
@@ -117,6 +135,13 @@
 .bid-description {
   margin: 5px 0;
   color: #666;
+  font-size: 14px;
+  line-height: 1.2;
+  max-height: 50.4px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 .bid-meta {
@@ -180,7 +205,7 @@
 
 .review-date {
   color: #888;
-  font-size: 12px;
+  font-size: 20px;
   font-style: italic;
 }
 
@@ -213,6 +238,11 @@
   margin-bottom: 15px;
   background-color: white;
   transition: all 0.3s ease;
+  height: 200px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .bid-card-container:hover {
@@ -222,4 +252,39 @@
 
 .bid-actions-container {
   margin-top: 10px;
+}
+
+/* Compact project card content */
+.project-card .flex-between {
+  margin-bottom: 8px;
+}
+
+.project-card .flex-between-center {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.project-card .review-date {
+  font-size: 15px;
+  color: #888;
+  margin: 0;
+  font-weight: bold;
+}
+
+.project-card .btn-delete-project {
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+/* Specific styling for bid cards in freelancer dashboard */
+.card .project-card {
+  height: 150px !important;
+  max-height: 150px !important;
+}
+
+/* Even more specific targeting for dashboard cards */
+.grid .card .project-card {
+  height: 150px !important;
+  max-height: 150px !important;
+  min-height: 150px !important;
 }

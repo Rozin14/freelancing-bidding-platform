@@ -1,20 +1,164 @@
+/* Enhanced Project Cards */
+.card {
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border-color: #007bff;
+}
+
 .project-title-link {
   text-decoration: none;
   color: #007bff;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.project-title-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
 }
 
 .project-description {
-  margin: 10px 0;
+  margin: 15px 0;
   color: #666;
+  line-height: 1.6;
+  font-size: 14px;
 }
 
 .client-link {
   margin-left: 5px;
   color: #007bff;
   text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.client-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
 }
 
 .project-meta {
   font-size: 14px;
   color: #888;
+  font-weight: 500;
+}
+
+/* Enhanced Status Badges */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.status-open {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+}
+
+.status-in_progress {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+}
+
+.status-completed {
+  background: linear-gradient(135deg, #6c757d, #495057);
+  color: white;
+}
+
+.status-closed {
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  color: white;
+}
+
+.status-cancelled {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: white;
+}
+
+/* Enhanced Skill Badges */
+.skill-badge {
+  background: linear-gradient(135deg, #e9ecef, #dee2e6);
+  color: #495057;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid #dee2e6;
+  transition: all 0.3s ease;
+}
+
+.skill-badge:hover {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+/* Enhanced Budget Display */
+.card .mb-10:has(strong:contains("Budget")) {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border-left: 4px solid #28a745;
+  font-weight: 600;
+  color: #28a745;
+}
+
+/* Enhanced Button */
+.card .btn:not(.btn-danger) {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.card .btn:not(.btn-danger):hover {
+  background: linear-gradient(135deg, #0056b3, #004085);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
+}
+
+/* Override for danger buttons */
+.card .btn.btn-danger {
+  background: #dc3545 !important;
+  color: white !important;
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3) !important;
+}
+
+.card .btn.btn-danger:hover {
+  background: #c82333 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4) !important;
+}
+
+/* Grid Layout Enhancement */
+.grid-2 {
+  gap: 20px;
+}
+
+/* Loading State Enhancement */
+.isLoading {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #6c757d;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: 12px;
+  border: 2px dashed #dee2e6;
 }

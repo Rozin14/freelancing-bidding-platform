@@ -401,3 +401,85 @@
   /* This class will be used for dynamic status badge styling */
   /* The actual styles are applied via the getStatusBadgeStyle function */
 }
+
+/* Enhanced Released Status Styles */
+.status-released {
+  position: relative;
+}
+
+.status-released-text {
+  color: #333 !important;
+  font-weight: bold;
+  border: none !important;
+  outline: none !important;
+}
+
+.released-indicator {
+  background: #f8f9fa;
+  color: #333;
+  padding: 12px 16px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.released-timeline {
+  background: #f8f9fa;
+  border: 2px solid #28a745;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 10px;
+  position: relative;
+}
+
+.released-timeline::before {
+  content: '🎉';
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 20px;
+}
+
+.released-success-message {
+  background: #f8f9fa;
+  color: #333;
+  padding: 10px 15px;
+  border-radius: 6px;
+  margin-top: 10px;
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid #28a745;
+}
+
+/* Enhanced escrow item styling for released status */
+.escrow-item:has(.status-released) {
+  background: #f8f9fa;
+}
+
+.escrow-item:has(.status-released):hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+/* Remove any green outlines from text elements inside selected escrow items */
+.escrow-item.selected .status-released-text,
+.escrow-item.selected .released-indicator,
+.escrow-item.selected .released-timeline,
+.escrow-item.selected .released-success-message {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove green outlines from all elements inside selected escrow items */
+.escrow-item.selected * {
+  border-color: transparent !important;
+  outline: none !important;
+}
+
+.escrow-item.selected *:focus {
+  border-color: transparent !important;
+  outline: none !important;
+}

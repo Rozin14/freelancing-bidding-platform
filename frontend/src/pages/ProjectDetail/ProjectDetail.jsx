@@ -2,26 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getAllEscrows, updateEscrowStatus } from '../../utils/escrowManager';
-import axios from 'axios';
+import api from '../../utils/axiosConfig';
 import './ProjectDetail.css';
 
 const ProjectDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [project, setProject] = useState(null);
+  
+  // State for project information
+  const [project, setProjectInfo] = useState(null);
   const [bids, setBids] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [bidForm, setBidForm] = useState({
+  const [isLoading, setIsLoading] = useState(true);
+  const [bidInput, setBidInput] = useState({
     amount: '',
     timeline: '',
     proposal: '',
   });
   const [showBidForm, setShowBidForm] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [editingBid, setEditingBid] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentBid, setCurrentBid] = useState(null);
   const [showEditForm, setShowEditForm] = useState(false);
-  const [projectEscrow, setProjectEscrow] = useState(null);
+  const [currentEscrow, setCurrentEscrow] = useState(null);
 
   useEffect(() => {
     fetchProjectDetails();
@@ -29,18 +31,18 @@ const ProjectDetail = () => {
 
   const fetchProjectDetails = async () => {
     try {
-      setLoading(true);
-      const projectResponse = await axios.get(`/api/projects/${id}`);
+      setIsLoading(true);
+      const projectResponse = await api.get(`/api/projects/${id}`);
       console.log('Project data:', projectResponse.data);
       console.log('Client data:', projectResponse.data.clientId);
       console.log('Client isActive:', projectResponse.data.clientId?.isActive);
-      setProject(projectResponse.data);
+      setProjectInfo(projectResponse.data);
 
       // Check for escrow
       const escrows = getAllEscrows();
       const escrow = escrows.find(e => e.projectId === id);
       console.log('ProjectDetail - Found escrow for project:', id, escrow);
-      setProjectEscrow(escrow);
+      setCurrentEscrow(escrow);
 
       // Fetch bids if user is the project owner (client) or a freelancer (to check if they've already bid)
       if (
@@ -50,7 +52,7 @@ const ProjectDetail = () => {
         (user && user.role === 'freelancer')
       ) {
         try {
-          const bidsResponse = await axios.get(`/api/bids/projects/${id}`);
+          const bidsResponse = await api.get(`/api/bids/projects/${id}`);
           setBids(bidsResponse.data);
         } catch (bidError) {
           console.error('Error fetching bids:', bidError);
@@ -62,10 +64,10 @@ const ProjectDetail = () => {
     } catch (error) {
       console.error('Error fetching project details:', error);
       if (error.response?.status === 404) {
-        setProject(null);
+        setProjectInfo(null);
       }
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -95,7 +97,7 @@ const ProjectDetail = () => {
     }
 
     // Client-side validation
-    const bidAmount = parseFloat(bidForm.amount);
+    const bidAmount = parseFloat(bidInput.amount);
     if (isNaN(bidAmount) || bidAmount <= 0) {
       alert('Bid amount must be greater than ₹0');
       return;
@@ -107,33 +109,33 @@ const ProjectDetail = () => {
       return;
     }
 
-    setSubmitting(true);
+    setIsSubmitting(true);
 
     try {
-      await axios.post('/api/bids', {
+      await api.post('/api/bids', {
         projectId: id,
-        ...bidForm,
+        ...bidInput,
       });
 
-      setBidForm({ amount: '', timeline: '', proposal: '' });
+      setBidInput({ amount: '', timeline: '', proposal: '' });
       setShowBidForm(false);
       fetchProjectDetails(); // Refresh data
       alert('Bid submitted successfully!');
     } catch (error) {
-      console.error('Error submitting bid:', error);
+      console.error('Error isSubmitting bid:', error);
       const errorMessage =
         error.response?.data?.message ||
-        'Error submitting bid. Please try again.';
+        'Error isSubmitting bid. Please try again.';
       alert(errorMessage);
     } finally {
-      setSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleAcceptBid = async bidId => {
     if (window.confirm('Are you sure you want to accept this bid?')) {
       try {
-        const response = await axios.put(`/api/bids/${bidId}/accept`);
+        const response = await api.put(`/api/bids/${bidId}/accept`);
         fetchProjectDetails(); // Refresh data
 
         // Handle platform notification if present
@@ -174,8 +176,8 @@ const ProjectDetail = () => {
   };
 
   const handleEditBid = bid => {
-    setEditingBid(bid);
-    setBidForm({
+    setCurrentBid(bid);
+    setBidInput({
       amount: bid.amount.toString(),
       timeline: bid.timeline,
       proposal: bid.proposal,
@@ -190,7 +192,7 @@ const ProjectDetail = () => {
       )
     ) {
       try {
-        const response = await axios.delete(`/api/bids/${bidId}`);
+        const response = await api.delete(`/api/bids/${bidId}`);
 
         // Handle platform notification if present (for accepted bids)
         if (response.data.notification) {
@@ -254,7 +256,7 @@ const ProjectDetail = () => {
     e.preventDefault();
 
     // Client-side validation
-    const bidAmount = parseFloat(bidForm.amount);
+    const bidAmount = parseFloat(bidInput.amount);
     if (isNaN(bidAmount) || bidAmount <= 0) {
       alert('Bid amount must be greater than ₹0');
       return;
@@ -266,18 +268,18 @@ const ProjectDetail = () => {
       return;
     }
 
-    setSubmitting(true);
+    setIsSubmitting(true);
 
     try {
-      await axios.put(`/api/bids/${editingBid._id}`, {
-        amount: bidForm.amount,
-        timeline: bidForm.timeline,
-        proposal: bidForm.proposal,
+      await api.put(`/api/bids/${currentBid._id}`, {
+        amount: bidInput.amount,
+        timeline: bidInput.timeline,
+        proposal: bidInput.proposal,
       });
 
-      setBidForm({ amount: '', timeline: '', proposal: '' });
+      setBidInput({ amount: '', timeline: '', proposal: '' });
       setShowEditForm(false);
-      setEditingBid(null);
+      setCurrentBid(null);
       fetchProjectDetails(); // Refresh data
       alert('Bid updated successfully!');
     } catch (error) {
@@ -287,14 +289,14 @@ const ProjectDetail = () => {
         'Error updating bid. Please try again.';
       alert(errorMessage);
     } finally {
-      setSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleCancelEdit = () => {
     setShowEditForm(false);
-    setEditingBid(null);
-    setBidForm({ amount: '', timeline: '', proposal: '' });
+    setCurrentBid(null);
+    setBidInput({ amount: '', timeline: '', proposal: '' });
   };
 
   const handleMarkCompleted = async () => {
@@ -316,7 +318,7 @@ const ProjectDetail = () => {
     
     if (window.confirm(confirmMessage)) {
       try {
-        const response = await axios.put(`/api/projects/${id}/complete`);
+        const response = await api.put(`/api/projects/${id}/complete`);
         fetchProjectDetails(); // Refresh data
 
         // Check if there's an escrow for this project and update its status
@@ -376,7 +378,7 @@ const ProjectDetail = () => {
       )
     ) {
       try {
-        const response = await axios.put(
+        const response = await api.put(
           `/api/projects/${id}/unmark-completed`
         );
         fetchProjectDetails(); // Refresh data
@@ -432,7 +434,7 @@ const ProjectDetail = () => {
     }
 
     try {
-      const response = await axios.put(`/api/projects/${id}/cancel`);
+      const response = await api.put(`/api/projects/${id}/cancel`);
       fetchProjectDetails(); // Refresh data
 
       // Handle platform notification if present
@@ -485,7 +487,7 @@ const ProjectDetail = () => {
     }
 
     try {
-      await axios.put(`/api/projects/${id}/reopen`);
+      await api.put(`/api/projects/${id}/reopen`);
       fetchProjectDetails(); // Refresh data
       alert('Project reopened successfully!');
     } catch (error) {
@@ -497,8 +499,8 @@ const ProjectDetail = () => {
     }
   };
 
-  if (loading) {
-    return <div className="loading">Loading project details...</div>;
+  if (isLoading) {
+    return <div className="isLoading">Loading project details...</div>;
   }
 
   if (!project) {
@@ -650,16 +652,16 @@ const ProjectDetail = () => {
                   <div className="mt-20">
                     {(() => {
                       console.log('ProjectDetail - Escrow check:', {
-                        projectEscrow,
-                        hasEscrow: !!projectEscrow,
-                        status: projectEscrow?.status,
-                        amount: projectEscrow?.amount,
+                        currentEscrow,
+                        hasEscrow: !!currentEscrow,
+                        status: currentEscrow?.status,
+                        amount: currentEscrow?.amount,
                         projectId: id
                       });
-                      return projectEscrow && projectEscrow.status && projectEscrow.status !== 'cancelled' && projectEscrow.amount > 0;
+                      return currentEscrow && currentEscrow.status && currentEscrow.status !== 'cancelled' && currentEscrow.amount > 0;
                     })() ? (
                       <div className="alert alert-success">
-                        <strong>✅ Escrow Protected:</strong> Client has sent ₹{projectEscrow.amount} to escrow. Your payment is secured.
+                        <strong>✅ Escrow Protected:</strong> Client has sent ₹{currentEscrow.amount} to escrow. Your payment is secured.
                       </div>
                     ) : (
                       <div className="alert alert-warning">
@@ -723,9 +725,9 @@ const ProjectDetail = () => {
                       <input
                         type="number"
                         className="form-input"
-                        value={bidForm.amount}
+                        value={bidInput.amount}
                         onChange={e =>
-                          setBidForm({ ...bidForm, amount: e.target.value })
+                          setBidInput({ ...bidInput, amount: e.target.value })
                         }
                         required
                         min="0"
@@ -744,9 +746,9 @@ const ProjectDetail = () => {
                       <input
                         type="text"
                         className="form-input"
-                        value={bidForm.timeline}
+                        value={bidInput.timeline}
                         onChange={e =>
-                          setBidForm({ ...bidForm, timeline: e.target.value })
+                          setBidInput({ ...bidInput, timeline: e.target.value })
                         }
                         placeholder="e.g., 2 weeks, 1 month"
                         required
@@ -757,9 +759,9 @@ const ProjectDetail = () => {
                       <label className="form-label">Proposal</label>
                       <textarea
                         className="form-textarea"
-                        value={bidForm.proposal}
+                        value={bidInput.proposal}
                         onChange={e =>
-                          setBidForm({ ...bidForm, proposal: e.target.value })
+                          setBidInput({ ...bidInput, proposal: e.target.value })
                         }
                         placeholder="Describe your approach and why you're the best fit for this project..."
                         required
@@ -770,13 +772,13 @@ const ProjectDetail = () => {
                       <button
                         type="submit"
                         className="btn btn-primary"
-                        disabled={submitting}
+                        disabled={isSubmitting}
                       >
-                        {submitting ? 'Submitting...' : 'Submit Bid'}
+                        {isSubmitting ? 'Submitting...' : 'Submit Bid'}
                       </button>
                       <button
                         type="button"
-                        className="btn btn-secondary"
+                        className="btn btn-danger"
                         onClick={() => setShowBidForm(false)}
                       >
                         Cancel
@@ -789,7 +791,7 @@ const ProjectDetail = () => {
           )}
 
           {/* Edit Bid Form */}
-          {showEditForm && editingBid && (
+          {showEditForm && currentBid && (
             <div className="card">
               <h3>Edit Your Bid</h3>
               <form onSubmit={handleEditBidSubmit}>
@@ -798,9 +800,9 @@ const ProjectDetail = () => {
                   <input
                     type="number"
                     className="form-input"
-                    value={bidForm.amount}
+                    value={bidInput.amount}
                     onChange={e =>
-                      setBidForm({ ...bidForm, amount: e.target.value })
+                      setBidInput({ ...bidInput, amount: e.target.value })
                     }
                     required
                     min="0"
@@ -819,9 +821,9 @@ const ProjectDetail = () => {
                   <input
                     type="text"
                     className="form-input"
-                    value={bidForm.timeline}
+                    value={bidInput.timeline}
                     onChange={e =>
-                      setBidForm({ ...bidForm, timeline: e.target.value })
+                      setBidInput({ ...bidInput, timeline: e.target.value })
                     }
                     placeholder="e.g., 2 weeks, 1 month"
                     required
@@ -832,9 +834,9 @@ const ProjectDetail = () => {
                   <label className="form-label">Proposal</label>
                   <textarea
                     className="form-textarea"
-                    value={bidForm.proposal}
+                    value={bidInput.proposal}
                     onChange={e =>
-                      setBidForm({ ...bidForm, proposal: e.target.value })
+                      setBidInput({ ...bidInput, proposal: e.target.value })
                     }
                     placeholder="Describe your approach and why you're the best fit for this project..."
                     required
@@ -845,13 +847,13 @@ const ProjectDetail = () => {
                   <button
                     type="submit"
                     className="btn btn-primary"
-                    disabled={submitting}
+                    disabled={isSubmitting}
                   >
-                    {submitting ? 'Updating...' : 'Update Bid'}
+                    {isSubmitting ? 'Updating...' : 'Update Bid'}
                   </button>
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className="btn btn-danger"
                     onClick={handleCancelEdit}
                   >
                     Cancel

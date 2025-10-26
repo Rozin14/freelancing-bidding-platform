@@ -1,4 +1,14 @@
-.user-card, .project-card {
+.user-card {
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 250px;
+}
+
+.admin-project-card {
   padding: 15px;
   border: 1px solid #eee;
   border-radius: 4px;
@@ -36,4 +46,67 @@
 .client-link:hover, .freelancer-link:hover {
   color: #0056b3;
   text-decoration: underline;
+}
+
+/* Admin User Management Grouped Layout */
+.admin-user-management {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.user-group {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #e9ecef;
+}
+
+.user-group-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #dee2e6;
+  color: #495057;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.user-group-icon {
+  font-size: 20px;
+}
+
+.user-group-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.no-users-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+  font-style: italic;
+  background: white;
+  border-radius: 6px;
+  border: 1px dashed #dee2e6;
+}
+
+/* Responsive Design for Admin User Management */
+@media (max-width: 768px) {
+  .admin-user-management {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .user-group {
+    padding: 15px;
+  }
+  
+  .user-group-title {
+    font-size: 16px;
+  }
 }

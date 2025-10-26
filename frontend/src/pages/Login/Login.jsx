@@ -4,38 +4,41 @@ import { useAuth } from '../../contexts/AuthContext';
 import './Login.css';
 
 const Login = () => {
-  const [formData, setFormData] = useState({
+  // State for form inputs
+  const [userInput, setUserInput] = useState({
     email: '',
     password: ''
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // Handle input changes
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setUserInput({
+      ...userInput,
       [e.target.name]: e.target.value
     });
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
+    setErrorMessage('');
+    setIsLoading(true);
 
-    const result = await login(formData.email, formData.password);
+    const result = await login(userInput.email, userInput.password);
     
     if (result.success) {
       navigate('/dashboard');
     } else {
-      setError(result.message);
+      setErrorMessage(result.message);
     }
     
-    setLoading(false);
+    setIsLoading(false);
   };
 
   return (
@@ -55,14 +58,14 @@ const Login = () => {
             <p className="login-subtitle">Sign in to your account to get started</p>
           </div>
           
-          {error && (
+          {errorMessage && (
             <div className="login-error">
               <svg className="error-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
                 <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" strokeWidth="2"/>
                 <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" strokeWidth="2"/>
               </svg>
-              {error}
+              {errorMessage}
             </div>
           )}
 
@@ -79,7 +82,7 @@ const Login = () => {
                 type="email"
                 name="email"
                 className="form-input"
-                value={formData.email}
+                value={userInput.email}
                 onChange={handleChange}
                 placeholder="Enter your email"
                 required
@@ -100,7 +103,7 @@ const Login = () => {
                   type={showPassword ? "text" : "password"}
                   name="password"
                   className="form-input"
-                  value={formData.password}
+                  value={userInput.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
                   required
@@ -129,9 +132,9 @@ const Login = () => {
             <button
               type="submit"
               className="login-button"
-              disabled={loading}
+              disabled={isLoading}
             >
-              {loading ? (
+              {isLoading ? (
                 <>
                   <svg className="loading-spinner" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeDasharray="31.416" strokeDashoffset="31.416">
