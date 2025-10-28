@@ -54,27 +54,6 @@ A basic yet feature rich freelance bidding platform, built with React frontend a
 - **Axios** for API calls
 - **CSS3** for styling
 
-## Escrow
-
-This project includes an escrow workflow to align incentives and reduce payment risk.
-
-### Current Implementation
-
-- Client-side utilities in `frontend/src/utils/escrowManager.js`
-- Backend project lifecycle endpoints support completion, settlement requests, acceptance, and admin close:
-  - Client requests settlement: `PUT /api/projects/:id/settle` (completed projects only)
-  - Freelancer accepts settlement: `PUT /api/projects/:id/accept-payment`
-  - Admin close (e.g., after funds released): `PUT /api/projects/:id/admin-close`
-
-### Notes
-
-- There is no on-chain or third-party payment gateway integration in the backend yet; funds are not actually moved. The current flow simulates the escrow lifecycle for demo purposes. If you require real payment handling, consider integrating a provider (Stripe Connect/PayPal) and persisting escrow transactions server-side with webhooks.
-
-### Roadmap
-
-- Add server-side escrow ledger and transaction states (funded, in_escrow, released, disputed)
-- Integrate payment provider with webhooks to transition project status automatically
-- Dispute resolution and admin adjudication tools
 
 ## Installation & Setup
 
@@ -308,8 +287,6 @@ Note: Client-side, non-persistent storage is used for certain features in this p
 - Role-based access control
 - Input validation and sanitization
 - CORS protection
-
-
 
 ## Development
 
