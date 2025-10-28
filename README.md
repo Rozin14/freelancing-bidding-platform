@@ -24,7 +24,7 @@ A basic yet feature rich freelance bidding platform, built with React frontend a
 
 ### Admin Panel
 
-- **User Management**: View, edit, and suspend user accounts
+- **User Management**: View and suspend user accounts
 - **Project Oversight**: Monitor all projects and their status
 - **Platform Administration**: Complete control over the platform
 
@@ -53,6 +53,28 @@ A basic yet feature rich freelance bidding platform, built with React frontend a
 - **React Router** for navigation
 - **Axios** for API calls
 - **CSS3** for styling
+
+## Escrow
+
+This project includes an escrow workflow to align incentives and reduce payment risk.
+
+### Current Implementation
+
+- Client-side utilities in `frontend/src/utils/escrowManager.js`
+- Backend project lifecycle endpoints support completion, settlement requests, acceptance, and admin close:
+  - Client requests settlement: `PUT /api/projects/:id/settle` (completed projects only)
+  - Freelancer accepts settlement: `PUT /api/projects/:id/accept-payment`
+  - Admin close (e.g., after funds released): `PUT /api/projects/:id/admin-close`
+
+### Notes
+
+- There is no on-chain or third-party payment gateway integration in the backend yet; funds are not actually moved. The current flow simulates the escrow lifecycle for demo purposes. If you require real payment handling, consider integrating a provider (Stripe Connect/PayPal) and persisting escrow transactions server-side with webhooks.
+
+### Roadmap
+
+- Add server-side escrow ledger and transaction states (funded, in_escrow, released, disputed)
+- Integrate payment provider with webhooks to transition project status automatically
+- Dispute resolution and admin adjudication tools
 
 ## Installation & Setup
 
@@ -205,6 +227,8 @@ The application expects a MongoDB database named "freelance" with the following 
 - `bids` - Freelancer bids on projects
 - `reviews` - Client reviews of freelancers
 
+Note: Client-side, non-persistent storage is used for certain features in this project (e.g., authentication tokens, lightweight messaging state, and other storage-related features). Specifically, `sessionStorage` and `localStorage` are used in the frontend where appropriate. This means some data (like messages in the current implementation) may be device/browser-scoped and not stored in MongoDB.
+
 ## Usage
 
 ### Getting Started
@@ -285,12 +309,7 @@ The application expects a MongoDB database named "freelance" with the following 
 - Input validation and sanitization
 - CORS protection
 
-### Security Roadmap
 
-- Add rate limiting and `helmet` for HTTP hardening
-- Centralized request validation (e.g., `express-validator`/Zod) across all routes
-- Audit logging for critical actions (auth, admin, payment lifecycle)
-- Refresh token rotation and short-lived access tokens
 
 ## Development
 
