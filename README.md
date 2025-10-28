@@ -54,6 +54,7 @@ A basic yet feature rich freelance bidding platform, built with React frontend a
 - **Axios** for API calls
 - **CSS3** for styling
 
+ 
 
 ## Installation & Setup
 
